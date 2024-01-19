@@ -1,0 +1,5 @@
+name: ServerRestart
+version: '${version}'
+main: me.xginko.serverrestart.ServerRestart
+api-version: '1.20'
+load: STARTUP

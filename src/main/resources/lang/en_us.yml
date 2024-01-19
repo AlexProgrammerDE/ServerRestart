@@ -1,0 +1,3 @@
+messages:
+  no-permission: "<red>You don't have permission to use this command."
+  server-is-restarting: "<gold>Server is restarting and will be back in a few minutes."
