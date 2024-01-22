@@ -2,6 +2,9 @@ package me.xginko.serverrestart;
 
 import me.xginko.serverrestart.config.Config;
 import me.xginko.serverrestart.config.LanguageCache;
+import me.xginko.serverrestart.enums.RestartMode;
+import me.xginko.serverrestart.events.GracefulServerRestartEvent;
+import me.xginko.serverrestart.events.ServerRestartEvent;
 import me.xginko.serverrestart.modules.ServerRestartModule;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -27,62 +30,103 @@ import java.util.zip.ZipEntry;
 public final class ServerRestart extends JavaPlugin {
 
     private static ServerRestart instance;
-    private Server server;
     private static HashMap<String, LanguageCache> languageCacheMap;
     private static Config config;
+    private static TPSCache tpsCache;
+    private static Server server;
     private static Logger logger;
+    private static boolean isFolia = false;
     private static boolean isRestarting = false;
+    private static boolean joiningAllowed = false;
 
     @Override
     public void onEnable() {
         instance = this;
         logger = getLogger();
         server = getServer();
+
+        try {
+            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
+            logger.info("Detected Folia");
+            isFolia = true;
+        } catch (ClassNotFoundException ignored) {}
+
+        reloadLang();
+        reloadConfiguration();
     }
 
-    @Override
-    public void onDisable() {
-        disablePlugin();
+    public static void restartGracefully(RestartMode mode, boolean kickAll, boolean saveAll, boolean disableJoining) {
+        GracefulServerRestartEvent graceful = new GracefulServerRestartEvent(mode, kickAll, saveAll, disableJoining);
+        if (!graceful.callEvent()) return;
+        setJoiningAllowed(!graceful.shouldDisableJoin());
+        if (graceful.shouldKickAll()) kickAll();
+        if (graceful.shouldSaveAll()) saveAll();
+        restartNow(graceful.getRestartMode());
     }
 
-    public void restartSafely(boolean shutdown) {
-        isRestarting = true;
+    public static void restartNow(RestartMode mode) {
+        ServerRestartEvent restart = new ServerRestartEvent(mode);
+        if (restart.callEvent()) {
+            switch (restart.getRestartMode()) {
+                case SPIGOT_RESTART -> server.spigot().restart();
+                case BUKKIT_SHUTDOWN -> server.shutdown();
+            }
+        }
+    }
 
-        // Kick every player with custom text before saving everything
+    public static void kickAll() {
         for (Player player : server.getOnlinePlayers()) {
             player.kick(ServerRestart.getLang(player.locale()).server_is_restarting, PlayerKickEvent.Cause.RESTART_COMMAND);
         }
+    }
 
-        // Save everything
-        server.getWorlds().forEach(World::save);
+    public static void saveAll() {
         server.savePlayers();
-
-        // Shutdown or restart
-        if (shutdown) {
-            server.shutdown();
-        } else {
-            server.spigot().restart();
+        for (World world : server.getWorlds()) {
+            world.save();
         }
+    }
+
+    public static boolean isFolia() {
+        return isFolia;
+    }
+
+    public static boolean isJoiningAllowed() {
+        return joiningAllowed;
+    }
+
+    public static void setJoiningAllowed(boolean allowed) {
+        joiningAllowed = allowed;
     }
 
     public static boolean isRestarting() {
         return isRestarting;
     }
+
     public static ServerRestart getInstance() {
         return instance;
     }
-    public static Config getConfigImpl() {
+
+    public static Config getConfiguration() {
         return config;
     }
+
+    public static TPSCache getTPSCache() {
+        return tpsCache;
+    }
+
     public static Logger getLog() {
         return logger;
     }
+
     public static LanguageCache getLang(Locale locale) {
         return getLang(locale.toString().toLowerCase());
     }
+
     public static LanguageCache getLang(CommandSender commandSender) {
         return commandSender instanceof Player player ? getLang(player.locale()) : getLang(config.default_lang);
     }
+
     public static LanguageCache getLang(String lang) {
         if (!config.auto_lang) return languageCacheMap.get(config.default_lang.toString().toLowerCase());
         return languageCacheMap.getOrDefault(lang.replace("-", "_"), languageCacheMap.get(config.default_lang.toString().toLowerCase()));
@@ -101,6 +145,7 @@ public final class ServerRestart extends JavaPlugin {
     private void reloadConfiguration() {
         try {
             config = new Config();
+            tpsCache = TPSCache.create(config.max_tps_check_interval_millis);
             ServerRestartModule.reloadModules();
             config.saveConfig();
         } catch (Exception e) {

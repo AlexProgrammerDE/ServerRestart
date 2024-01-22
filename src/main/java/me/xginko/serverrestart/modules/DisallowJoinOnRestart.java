@@ -9,9 +9,7 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 
 public class DisallowJoinOnRestart implements ServerRestartModule, Listener {
 
-    public DisallowJoinOnRestart() {
-
-    }
+    public DisallowJoinOnRestart() {}
 
     @Override
     public boolean shouldEnable() {
@@ -31,9 +29,11 @@ public class DisallowJoinOnRestart implements ServerRestartModule, Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onPlayerAttemptJoin(AsyncPlayerPreLoginEvent event) {
-        if (ServerRestart.isRestarting()) event.disallow(
-                AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-                ServerRestart.getLang(ServerRestart.getConfigImpl().default_lang).server_is_restarting
-        );
+        if (!ServerRestart.isJoiningAllowed() || ServerRestart.isRestarting()) {
+            event.disallow(
+                    AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
+                    ServerRestart.getLang(ServerRestart.getConfiguration().default_lang).server_is_restarting
+            );
+        }
     }
 }

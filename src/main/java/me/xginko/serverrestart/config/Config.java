@@ -18,6 +18,7 @@ public class Config {
     public final Locale default_lang;
     public final ZoneId timeZone;
     public final Duration playercount_restart_delay;
+    public final long max_tps_check_interval_millis;
     public final int playercount_restartable;
     public final boolean auto_lang, playercount_delay_enabled;
 
@@ -37,6 +38,9 @@ public class Config {
                 "If set to true, will display messages based on client language");
 
         // General Settings
+        this.max_tps_check_interval_millis = getInt("general.tps-cache-time-ticks", 20,
+                "How long a checked tps is cached to save resources in ticks (1 sec = 20 ticks)") * 50L;
+
         ZoneId zoneId = ZoneId.systemDefault();
         try {
             zoneId = ZoneId.of(getString("general.timezone", ZoneId.systemDefault().getId(),

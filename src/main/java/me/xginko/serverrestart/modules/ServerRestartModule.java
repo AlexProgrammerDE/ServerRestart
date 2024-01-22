@@ -14,7 +14,7 @@ public interface ServerRestartModule {
         modules.forEach(ServerRestartModule::disable);
         modules.clear();
 
-        // modules.add();
+        modules.add(new DisallowJoinOnRestart());
 
         for (ServerRestartModule module : modules) {
             if (module.shouldEnable()) module.enable();
