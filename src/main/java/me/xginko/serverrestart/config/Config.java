@@ -38,13 +38,13 @@ public class Config {
                 "If set to true, will display messages based on client language");
 
         // General Settings
-        this.max_tps_check_interval_millis = getInt("general.tps-cache-time-ticks", 20,
+        this.max_tps_check_interval_millis = getInt("general.tps-cache-time-ticks", 40,
                 "How long a checked tps is cached to save resources in ticks (1 sec = 20 ticks)") * 50L;
 
         ZoneId zoneId = ZoneId.systemDefault();
         try {
             zoneId = ZoneId.of(getString("general.timezone", ZoneId.systemDefault().getId(),
-                    "The ZoneId to use for scheduling restarts."));
+                    "The ZoneId to use for scheduling restart times."));
         } catch (ZoneRulesException e) {
             ServerRestart.getLog().warning("Configured timezone could not be found. Using system default.");
         } catch (DateTimeException e) {
@@ -63,7 +63,7 @@ public class Config {
 
     public void saveConfig() {
         try {
-            configFile.save();
+            this.configFile.save();
         } catch (Exception e) {
             ServerRestart.getLog().severe("Failed to save config file! - " + e.getLocalizedMessage());
         }
@@ -74,57 +74,57 @@ public class Config {
     }
 
     public void createTitledSection(String title, String path) {
-        configFile.addSection(title);
-        configFile.addDefault(path, null);
+        this.configFile.addSection(title);
+        this.configFile.addDefault(path, null);
     }
 
     public boolean getBoolean(String path, boolean def, String comment) {
-        configFile.addDefault(path, def, comment);
-        return configFile.getBoolean(path, def);
+        this.configFile.addDefault(path, def, comment);
+        return this.configFile.getBoolean(path, def);
     }
 
     public boolean getBoolean(String path, boolean def) {
-        configFile.addDefault(path, def);
-        return configFile.getBoolean(path, def);
+        this.configFile.addDefault(path, def);
+        return this.configFile.getBoolean(path, def);
     }
 
     public String getString(String path, String def, String comment) {
-        configFile.addDefault(path, def, comment);
-        return configFile.getString(path, def);
+        this.configFile.addDefault(path, def, comment);
+        return this.configFile.getString(path, def);
     }
 
     public String getString(String path, String def) {
-        configFile.addDefault(path, def);
-        return configFile.getString(path, def);
+        this.configFile.addDefault(path, def);
+        return this.configFile.getString(path, def);
     }
 
     public double getDouble(String path, double def, String comment) {
-        configFile.addDefault(path, def, comment);
-        return configFile.getDouble(path, def);
+        this.configFile.addDefault(path, def, comment);
+        return this.configFile.getDouble(path, def);
     }
 
     public double getDouble(String path, double def) {
-        configFile.addDefault(path, def);
-        return configFile.getDouble(path, def);
+        this.configFile.addDefault(path, def);
+        return this.configFile.getDouble(path, def);
     }
 
     public int getInt(String path, int def, String comment) {
-        configFile.addDefault(path, def, comment);
-        return configFile.getInteger(path, def);
+        this.configFile.addDefault(path, def, comment);
+        return this.configFile.getInteger(path, def);
     }
 
     public int getInt(String path, int def) {
-        configFile.addDefault(path, def);
-        return configFile.getInteger(path, def);
+        this.configFile.addDefault(path, def);
+        return this.configFile.getInteger(path, def);
     }
 
     public List<String> getList(String path, List<String> def, String comment) {
-        configFile.addDefault(path, def, comment);
-        return configFile.getStringList(path);
+        this.configFile.addDefault(path, def, comment);
+        return this.configFile.getStringList(path);
     }
 
     public List<String> getList(String path, List<String> def) {
-        configFile.addDefault(path, def);
-        return configFile.getStringList(path);
+        this.configFile.addDefault(path, def);
+        return this.configFile.getStringList(path);
     }
 }

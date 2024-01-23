@@ -1,6 +1,12 @@
 package me.xginko.serverrestart.modules;
 
-public class RestartTimer implements ServerRestartModule, Runnable {
+import me.xginko.serverrestart.ServerRestart;
+
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
+
+public class RestartTimer extends TimerTask implements ServerRestartModule {
 
     public RestartTimer() {
 
@@ -13,12 +19,15 @@ public class RestartTimer implements ServerRestartModule, Runnable {
 
     @Override
     public void enable() {
-
+        Timer timer = new Timer(ServerRestart.getInstance().getName()+"_Restart-Timer_"+ UUID.randomUUID());
+        // init delay: duration.of first restarttime -> now - 15min
+        // period: 1sec
+        timer.scheduleAtFixedRate(this, 1000L, 1000L);
     }
 
     @Override
     public void disable() {
-
+        this.cancel();
     }
 
     /**

@@ -25,6 +25,18 @@ public class GracefulServerRestartEvent extends Event implements Cancellable {
         this.disableJoining = disableJoining;
     }
 
+    /**
+     * Called when the server is performing various .
+     * Will not be called when pre-shutdown tasks are skipped.
+     */
+    public GracefulServerRestartEvent(RestartMode restartMode, boolean kickAll, boolean saveAll, boolean disableJoining, boolean isAsync) {
+        super(isAsync);
+        this.restartMode = restartMode;
+        this.kickAll = kickAll;
+        this.saveAll = saveAll;
+        this.disableJoining = disableJoining;
+    }
+
     public RestartMode getRestartMode() {
         return restartMode;
     }

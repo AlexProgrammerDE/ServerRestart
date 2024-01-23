@@ -6,35 +6,29 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
-public class ServerRestartEvent extends Event implements Cancellable {
+public class PreRestartCountdownEvent extends Event implements Cancellable {
 
     private static final @NotNull HandlerList handlers = new HandlerList();
     private boolean isCancelled = false;
 
-    private RestartMode restartMode;
+
 
     /**
-     * Called right before the restart/shutdown methods are executed.
+     * Called right before the countdown timer begins.
      */
-    public ServerRestartEvent(RestartMode restartMode) {
-        this.restartMode = restartMode;
+    public PreRestartCountdownEvent() {
+
     }
 
     /**
-     * Called right before the restart/shutdown methods are executed.
+     * Called right before the countdown timer begins.
      */
-    public ServerRestartEvent(RestartMode restartMode, boolean isAsync) {
+    public PreRestartCountdownEvent(boolean isAsync) {
         super(isAsync);
-        this.restartMode = restartMode;
+
     }
 
-    public RestartMode getRestartMode() {
-        return restartMode;
-    }
 
-    public void setRestartMode(RestartMode restartMode) {
-        this.restartMode = restartMode;
-    }
 
     @Override
     public void setCancelled(boolean cancel) {

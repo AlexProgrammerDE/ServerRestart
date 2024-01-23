@@ -3,9 +3,8 @@ package me.xginko.serverrestart;
 import me.xginko.serverrestart.config.Config;
 import me.xginko.serverrestart.config.LanguageCache;
 import me.xginko.serverrestart.enums.RestartMode;
-import me.xginko.serverrestart.events.GracefulServerRestartEvent;
-import me.xginko.serverrestart.events.ServerRestartEvent;
 import me.xginko.serverrestart.modules.ServerRestartModule;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -56,21 +55,16 @@ public final class ServerRestart extends JavaPlugin {
     }
 
     public static void restartGracefully(RestartMode mode, boolean kickAll, boolean saveAll, boolean disableJoining) {
-        GracefulServerRestartEvent graceful = new GracefulServerRestartEvent(mode, kickAll, saveAll, disableJoining);
-        if (!graceful.callEvent()) return;
-        setJoiningAllowed(!graceful.shouldDisableJoin());
-        if (graceful.shouldKickAll()) kickAll();
-        if (graceful.shouldSaveAll()) saveAll();
-        restartNow(graceful.getRestartMode());
+        setJoiningAllowed(!disableJoining);
+        if (kickAll) kickAll();
+        if (saveAll) saveAll();
+        restartNow(mode);
     }
 
     public static void restartNow(RestartMode mode) {
-        ServerRestartEvent restart = new ServerRestartEvent(mode);
-        if (restart.callEvent()) {
-            switch (restart.getRestartMode()) {
-                case SPIGOT_RESTART -> server.spigot().restart();
-                case BUKKIT_SHUTDOWN -> server.shutdown();
-            }
+        switch (mode) {
+            case SPIGOT_RESTART -> server.spigot().restart();
+            case BUKKIT_SHUTDOWN -> server.shutdown();
         }
     }
 
@@ -84,6 +78,16 @@ public final class ServerRestart extends JavaPlugin {
         server.savePlayers();
         for (World world : server.getWorlds()) {
             world.save();
+        }
+    }
+
+    public static void broadcastRestart() {
+        if (!config.auto_lang) {
+            server.broadcast(Component.empty());
+            return;
+        }
+        for (Player player : server.getOnlinePlayers()) {
+            player.sendMessage(Component.empty());
         }
     }
 
