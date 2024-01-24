@@ -1,6 +1,6 @@
 package me.xginko.serverrestart.enums;
 
-public enum RestartMode {
+public enum RestartMethod {
     SPIGOT_RESTART,
     BUKKIT_SHUTDOWN;
 }

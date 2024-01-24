@@ -1,17 +1,14 @@
-package me.xginko.serverrestart.modules;
+package me.xginko.serverrestart.module;
 
 import me.xginko.serverrestart.ServerRestart;
-import me.xginko.serverrestart.events.GracefulServerRestartEvent;
-import me.xginko.serverrestart.events.PreRestartCountdownEvent;
-import me.xginko.serverrestart.events.ServerRestartEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 
-public class DelayRestartOnPlayerCount implements ServerRestartModule, Listener {
+public class RestartDelay implements ServerRestartModule, Listener {
 
-    public DelayRestartOnPlayerCount() {}
+    public RestartDelay() {}
 
     @Override
     public boolean shouldEnable() {
@@ -30,7 +27,7 @@ public class DelayRestartOnPlayerCount implements ServerRestartModule, Listener 
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    private void onPreRestartCountdown(PreRestartCountdownEvent event) {
+    private void onPreRestart() {
         // Delay logic
     }
 }

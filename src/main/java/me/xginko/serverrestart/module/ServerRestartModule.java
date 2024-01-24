@@ -1,4 +1,4 @@
-package me.xginko.serverrestart.modules;
+package me.xginko.serverrestart.module;
 
 import java.util.HashSet;
 
@@ -14,7 +14,7 @@ public interface ServerRestartModule {
         modules.forEach(ServerRestartModule::disable);
         modules.clear();
 
-        modules.add(new DisallowJoinOnRestart());
+        modules.add(new JoinToggle());
 
         for (ServerRestartModule module : modules) {
             if (module.shouldEnable()) module.enable();

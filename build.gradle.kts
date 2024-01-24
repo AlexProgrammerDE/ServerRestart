@@ -29,7 +29,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
+    compileOnly("dev.folia:folia-api:1.20.2-R0.1-SNAPSHOT")
     api("com.github.thatsmusic99:ConfigurationMaster-API:v2.0.0-rc.1")
     api("com.github.ben-manes.caffeine:caffeine:3.1.8")
     paperweight.foliaDevBundle("1.20.2-R0.1-SNAPSHOT")

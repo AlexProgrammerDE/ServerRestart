@@ -2,8 +2,8 @@ package me.xginko.serverrestart;
 
 import me.xginko.serverrestart.config.Config;
 import me.xginko.serverrestart.config.LanguageCache;
-import me.xginko.serverrestart.enums.RestartMode;
-import me.xginko.serverrestart.modules.ServerRestartModule;
+import me.xginko.serverrestart.enums.RestartMethod;
+import me.xginko.serverrestart.module.ServerRestartModule;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -15,6 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
@@ -32,14 +33,15 @@ public final class ServerRestart extends JavaPlugin {
     private static HashMap<String, LanguageCache> languageCacheMap;
     private static Config config;
     private static TPSCache tpsCache;
+    private static AsyncHeartbeat heartbeat;
     private static Server server;
     private static Logger logger;
-    private static boolean isFolia = false;
-    private static boolean isRestarting = false;
-    private static boolean joiningAllowed = false;
+    private static boolean isFolia, joiningAllowed;
+    public static boolean isRestarting;
 
     @Override
     public void onEnable() {
+        isFolia = joiningAllowed = isRestarting = false;
         instance = this;
         logger = getLogger();
         server = getServer();
@@ -54,14 +56,14 @@ public final class ServerRestart extends JavaPlugin {
         reloadConfiguration();
     }
 
-    public static void restartGracefully(RestartMode mode, boolean kickAll, boolean saveAll, boolean disableJoining) {
+    public static void restartGracefully(RestartMethod mode, boolean kickAll, boolean saveAll, boolean disableJoining) {
         setJoiningAllowed(!disableJoining);
         if (kickAll) kickAll();
         if (saveAll) saveAll();
         restartNow(mode);
     }
 
-    public static void restartNow(RestartMode mode) {
+    public static void restartNow(RestartMethod mode) {
         switch (mode) {
             case SPIGOT_RESTART -> server.spigot().restart();
             case BUKKIT_SHUTDOWN -> server.shutdown();
@@ -75,10 +77,10 @@ public final class ServerRestart extends JavaPlugin {
     }
 
     public static void saveAll() {
-        server.savePlayers();
         for (World world : server.getWorlds()) {
             world.save();
         }
+        server.savePlayers();
     }
 
     public static void broadcastRestart() {
@@ -101,10 +103,6 @@ public final class ServerRestart extends JavaPlugin {
 
     public static void setJoiningAllowed(boolean allowed) {
         joiningAllowed = allowed;
-    }
-
-    public static boolean isRestarting() {
-        return isRestarting;
     }
 
     public static ServerRestart getInstance() {
@@ -147,9 +145,11 @@ public final class ServerRestart extends JavaPlugin {
     }
 
     private void reloadConfiguration() {
+        heartbeat.stop();
         try {
             config = new Config();
-            tpsCache = TPSCache.create(config.max_tps_check_interval_millis);
+            heartbeat = new AsyncHeartbeat();
+            tpsCache = TPSCache.create(Duration.ofMillis(config.max_tps_check_interval_millis));
             ServerRestartModule.reloadModules();
             config.saveConfig();
         } catch (Exception e) {

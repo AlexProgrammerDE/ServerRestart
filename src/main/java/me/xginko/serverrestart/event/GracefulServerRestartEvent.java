@@ -1,6 +1,6 @@
-package me.xginko.serverrestart.events;
+package me.xginko.serverrestart.event;
 
-import me.xginko.serverrestart.enums.RestartMode;
+import me.xginko.serverrestart.enums.RestartMethod;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -11,15 +11,15 @@ public class GracefulServerRestartEvent extends Event implements Cancellable {
     private static final @NotNull HandlerList handlers = new HandlerList();
     private boolean isCancelled = false;
 
-    private RestartMode restartMode;
+    private RestartMethod restartMethod;
     private boolean kickAll, saveAll, disableJoining;
 
     /**
      * Called when the server is performing various .
      * Will not be called when pre-shutdown tasks are skipped.
      */
-    public GracefulServerRestartEvent(RestartMode restartMode, boolean kickAll, boolean saveAll, boolean disableJoining) {
-        this.restartMode = restartMode;
+    public GracefulServerRestartEvent(RestartMethod restartMethod, boolean kickAll, boolean saveAll, boolean disableJoining) {
+        this.restartMethod = restartMethod;
         this.kickAll = kickAll;
         this.saveAll = saveAll;
         this.disableJoining = disableJoining;
@@ -29,20 +29,20 @@ public class GracefulServerRestartEvent extends Event implements Cancellable {
      * Called when the server is performing various .
      * Will not be called when pre-shutdown tasks are skipped.
      */
-    public GracefulServerRestartEvent(RestartMode restartMode, boolean kickAll, boolean saveAll, boolean disableJoining, boolean isAsync) {
+    public GracefulServerRestartEvent(RestartMethod restartMethod, boolean kickAll, boolean saveAll, boolean disableJoining, boolean isAsync) {
         super(isAsync);
-        this.restartMode = restartMode;
+        this.restartMethod = restartMethod;
         this.kickAll = kickAll;
         this.saveAll = saveAll;
         this.disableJoining = disableJoining;
     }
 
-    public RestartMode getRestartMode() {
-        return restartMode;
+    public RestartMethod getRestartMethod() {
+        return restartMethod;
     }
 
-    public void setRestartMode(RestartMode restartMode) {
-        this.restartMode = restartMode;
+    public void setRestartMethod(RestartMethod restartMethod) {
+        this.restartMethod = restartMethod;
     }
 
     public boolean shouldKickAll() {

@@ -1,4 +1,4 @@
-package me.xginko.serverrestart.modules;
+package me.xginko.serverrestart.module;
 
 import me.xginko.serverrestart.ServerRestart;
 import org.bukkit.event.EventHandler;
@@ -7,9 +7,9 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 
-public class DisallowJoinOnRestart implements ServerRestartModule, Listener {
+public class JoinToggle implements ServerRestartModule, Listener {
 
-    public DisallowJoinOnRestart() {}
+    public JoinToggle() {}
 
     @Override
     public boolean shouldEnable() {
@@ -28,8 +28,8 @@ public class DisallowJoinOnRestart implements ServerRestartModule, Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    private void onPlayerAttemptJoin(AsyncPlayerPreLoginEvent event) {
-        if (!ServerRestart.isJoiningAllowed() || ServerRestart.isRestarting()) {
+    private void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent event) {
+        if (!ServerRestart.isJoiningAllowed() || ServerRestart.isRestarting) {
             event.disallow(
                     AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
                     ServerRestart.getLang(ServerRestart.getConfiguration().default_lang).server_is_restarting
