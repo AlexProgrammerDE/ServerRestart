@@ -79,8 +79,8 @@ public class LowTPSRestart implements ServerRestartModule, Listener {
             return;
         }
 
-        ServerRestart.getLog().severe("Restarting server because on fire! - TPS was lower than " + restartTPS +
-                " for " + CommonUtil.formatDuration(Duration.ofMillis(maxLagMillis)));
+        ServerRestart.getLog().severe("Restarting server because on fire! - TPS was lower than " +
+                String.format("%.2f", restartTPS) + " for " + CommonUtil.formatDuration(Duration.ofMillis(maxLagMillis)));
 
         ServerRestart.restart(
                 restartEvent.getMethod(),
