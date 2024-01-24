@@ -2,6 +2,8 @@ package me.xginko.serverrestart;
 
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import me.xginko.serverrestart.event.AsyncHeartbeatEvent;
+import org.bukkit.Server;
+import org.bukkit.plugin.PluginManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
@@ -10,12 +12,14 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public final class AsyncHeart implements Runnable {
 
+    private final @NotNull PluginManager pluginManager;
     private final @NotNull ScheduledTask HEARTBEAT;
     private final @NotNull AtomicLong LAST_CALL;
 
     AsyncHeart(long initialDelayMillis, long intervalMillis) {
         this.LAST_CALL = new AtomicLong();
         ServerRestart plugin = ServerRestart.getInstance();
+        this.pluginManager = plugin.getServer().getPluginManager();
         this.HEARTBEAT = plugin.getServer().getAsyncScheduler().runAtFixedRate(
                 plugin,
                 BEAT_TASK -> this.run(),
@@ -41,7 +45,7 @@ public final class AsyncHeart implements Runnable {
         if (ServerRestart.isRestarting) {
             this.HEARTBEAT.cancel(); // Self end
         } else {
-            new AsyncHeartbeatEvent(this.LAST_CALL.get(), System.currentTimeMillis()).callEvent();
+            this.pluginManager.callEvent(new AsyncHeartbeatEvent(this.LAST_CALL.get(), System.currentTimeMillis()));
             this.LAST_CALL.set(System.currentTimeMillis());
         }
     }
