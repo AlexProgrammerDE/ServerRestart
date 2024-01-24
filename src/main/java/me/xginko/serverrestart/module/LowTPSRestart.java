@@ -30,10 +30,10 @@ public class LowTPSRestart implements ServerRestartModule, Listener {
         this.safelyRestart = config.getBoolean("restart-on-low-TPS.restart-gracefully", true, """
                 Will disable joining, kick all players and save everything before restarting.\s
                 If set to false, will just immediately shutdown/restart.""");
-        this.restartTPS = config.getDouble("restart-on-low-TPS.restart-TPS", 12.5,
-                "The tps at which to start taking measures.");
-        this.maxLagMillis = TimeUnit.SECONDS.toMillis(config.getInt("restart-on-low-TPS.min-lag-duration", 10,
-                "How long in seconds the server needs to be lower than the configured tps to restart."));
+        this.restartTPS = Math.max(0.01, config.getDouble("restart-on-low-TPS.restart-TPS", 12.5,
+                "The tps at which to start taking measures."));
+        this.maxLagMillis = TimeUnit.SECONDS.toMillis(Math.max(1, config.getInt("restart-on-low-TPS.min-lag-duration", 10,
+                "How long in seconds the server needs to be lower than the configured tps to restart.")));
     }
 
     @Override
@@ -43,7 +43,8 @@ public class LowTPSRestart implements ServerRestartModule, Listener {
 
     @Override
     public void enable() {
-
+        ServerRestart plugin = ServerRestart.getInstance();
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @Override

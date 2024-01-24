@@ -2,7 +2,7 @@ package me.xginko.serverrestart.module;
 
 import me.xginko.serverrestart.ServerRestart;
 import me.xginko.serverrestart.config.Config;
-import me.xginko.serverrestart.event.ServerRestartEvent;
+import me.xginko.serverrestart.event.RestartCountDownEvent;
 import org.bukkit.Server;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -23,10 +23,10 @@ public class PlayerCountDelay implements ServerRestartModule, Listener {
         Config config = ServerRestart.getConfiguration();
         config.master().addComment("player-count-delay.delay-restart-on-high-count",
                 "If enabled, will only restart once playercount is below the configured number.");
-        this.minPlayersToDelay = config.getInt("player-count-delay.min-players-for-delay", 10,
-                "If the playercount is this value or bigger, restart logic will be delayed.");
-        this.delayMillis = TimeUnit.SECONDS.toMillis(Math.max(config.getInt("player-count-delay.delay-seconds", 300,
-                "Time in seconds until plugin will check again if it can restart."), 1));
+        this.minPlayersToDelay = Math.max(1, config.getInt("player-count-delay.min-players-for-delay", 20,
+                "If the playercount is this value or bigger, restart logic will be delayed."));
+        this.delayMillis = TimeUnit.SECONDS.toMillis(Math.max(1, config.getInt("player-count-delay.delay-seconds", 300,
+                "Time in seconds until plugin will check again if it can restart.")));
     }
 
     @Override
@@ -46,11 +46,13 @@ public class PlayerCountDelay implements ServerRestartModule, Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    private void onRestart(ServerRestartEvent event) {
-        if (server.getOnlinePlayers().size() <= minPlayersToDelay) return;
+    private void onCountdown(RestartCountDownEvent event) {
+        if (server.getOnlinePlayers().size() >= minPlayersToDelay) {
+            event.setCancelled(true);
 
-        event.setCancelled(true);
+            // Broadcast / log
 
-        // Broadcast / log
+            // Logic for schedule next
+        }
     }
 }
