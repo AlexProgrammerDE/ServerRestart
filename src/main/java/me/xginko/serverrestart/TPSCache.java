@@ -83,7 +83,7 @@ public interface TPSCache {
                 }
             }
 
-            regions.clear(); // Discard regions after use
+            regions.clear(); // cleanup regions after use
             return lowestRegionTPS;
         }
     }

@@ -11,6 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,6 +58,7 @@ public final class ServerRestart extends JavaPlugin {
     }
 
     public static void restartGracefully(RestartMethod mode, boolean kickAll, boolean saveAll, boolean disableJoining) {
+        isRestarting = true;
         setJoiningAllowed(!disableJoining);
         if (kickAll) kickAll();
         if (saveAll) saveAll();
@@ -64,6 +66,7 @@ public final class ServerRestart extends JavaPlugin {
     }
 
     public static void restartNow(RestartMethod mode) {
+        isRestarting = true;
         switch (mode) {
             case SPIGOT_RESTART -> server.spigot().restart();
             case BUKKIT_SHUTDOWN -> server.shutdown();
@@ -145,10 +148,10 @@ public final class ServerRestart extends JavaPlugin {
     }
 
     private void reloadConfiguration() {
-        heartbeat.stop();
         try {
+            heartbeat.stop();
             config = new Config();
-            heartbeat = new AsyncHeartbeat();
+            heartbeat = new AsyncHeartbeat(config.heartbeat_initial_delay_millis, config.heartbeat_interval_millis);
             tpsCache = TPSCache.create(Duration.ofMillis(config.max_tps_check_interval_millis));
             ServerRestartModule.reloadModules();
             config.saveConfig();

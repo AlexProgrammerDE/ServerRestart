@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.time.DateTimeException;
-import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.zone.ZoneRulesException;
@@ -20,10 +19,8 @@ public class Config {
     public final @NotNull ZonedDateTime INIT_TIME;
     public final @NotNull Set<ZonedDateTime> RESTART_TIMES;
     public final @NotNull Locale default_lang;
-    public final @NotNull Duration playercount_restart_delay;
-    public final long max_tps_check_interval_millis;
-    public final int playercount_restartable;
-    public final boolean auto_lang, playercount_delay_enabled;
+    public final long max_tps_check_interval_millis, heartbeat_initial_delay_millis, heartbeat_interval_millis;
+    public final boolean auto_lang;
 
     public Config() throws Exception {
         // Create plugin folder first if it does not exist yet
@@ -34,6 +31,7 @@ public class Config {
         this.configFile = ConfigFile.loadConfig(new File(pluginFolder, "config.yml"));
 
         // Language Settings
+        this.createTitledSection("Language Settings", "language");
         this.default_lang = Locale.forLanguageTag(getString("language.default-language", "en_us",
                 "The default language that will be used if auto-language is false or no matching language file was found.")
                 .replace("_", "-"));
@@ -41,28 +39,24 @@ public class Config {
                 "If set to true, will display messages based on client language");
 
         // General Settings
-        this.max_tps_check_interval_millis = getInt("general.tps-cache-time-ticks", 40,
-                "How long a checked tps is cached to save resources in ticks (1 sec = 20 ticks)") * 50L;
+        this.createTitledSection("General Settings", "general");
         ZoneId zoneId = ZoneId.systemDefault();
         try {
             zoneId = ZoneId.of(getString("general.timezone", zoneId.getId(),
-                    "The ZoneId to use for scheduling restart times."));
+                    "The TimeZone (ZoneId) to use for scheduling restart times."));
         } catch (ZoneRulesException e) {
-            ServerRestart.getLog().warning("Configured timezone could not be found. Using '"+zoneId+"' (System Default)");
+            ServerRestart.getLog().warning("Configured timezone could not be found. Using host zone '"+zoneId+"' (System Default)");
         } catch (DateTimeException e) {
             ServerRestart.getLog().warning("Configured timezone has an invalid format. Using '"+zoneId+"' (System Default)");
         }
         this.INIT_TIME = ZonedDateTime.now(zoneId);
-
-        // Playercount Settings
-        this.playercount_delay_enabled = getBoolean("playercount.delay-restart-on-high-playercount", false,
-                "If enabled, will only restart once playercount is below the configured number.");
-        this.playercount_restartable = getInt("playercount.min-players-for-delay", 10,
-                "If the playercount is this value or bigger, restart logic will be delayed.");
-        this.playercount_restart_delay = Duration.ofSeconds(getInt("playercount.delay-seconds", 300,
-                "Time in seconds until plugin will check again if it can restart."));
+        this.max_tps_check_interval_millis = Math.max(getInt("general.tps-cache-time-ticks", 40,
+                "How long a checked tps is cached to save resources in ticks (1 sec = 20 ticks)"), 20) * 50L;
+        this.heartbeat_initial_delay_millis = getInt("general.heartbeat.initial-delay-millis", 5000);
+        this.heartbeat_interval_millis = getInt("general.heartbeat.interval-millis", 1000);
 
         // Restart times
+        this.createTitledSection("Restart Times", "restart-times");
         this.RESTART_TIMES = getList("restart-times", List.of("02:00:00", "03:00:00", "04:00:00"))
                 .stream()
                 .distinct()
@@ -81,12 +75,12 @@ public class Config {
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(HashSet::new));
-
         if (this.RESTART_TIMES.isEmpty()) {
-            final ZonedDateTime am2zoned = this.getRestartTime(2,0,0);
+            final ZonedDateTime am2zoned = this.getRestartTime(2,30,0);
             this.RESTART_TIMES.add(am2zoned);
             ServerRestart.getLog().warning("Queued 1 restart for " + am2zoned + " due to restart times being invalid or empty.");
         }
+
 
     }
 
@@ -105,8 +99,7 @@ public class Config {
         }
     }
 
-    @NotNull
-    public ConfigFile master() {
+    public @NotNull ConfigFile master() {
         return configFile;
     }
 
@@ -125,16 +118,14 @@ public class Config {
         return this.configFile.getBoolean(path, def);
     }
 
-    @NotNull
-    public String getString(@NotNull String path, @NotNull String def, @NotNull String comment) {
+    public int getInt(@NotNull String path, int def, @NotNull String comment) {
         this.configFile.addDefault(path, def, comment);
-        return this.configFile.getString(path, def);
+        return this.configFile.getInteger(path, def);
     }
 
-    @NotNull
-    public String getString(@NotNull String path, @NotNull String def) {
+    public int getInt(@NotNull String path, int def) {
         this.configFile.addDefault(path, def);
-        return this.configFile.getString(path, def);
+        return this.configFile.getInteger(path, def);
     }
 
     public double getDouble(@NotNull String path, double def, @NotNull String comment) {
@@ -147,24 +138,22 @@ public class Config {
         return this.configFile.getDouble(path, def);
     }
 
-    public int getInt(@NotNull String path, int def, @NotNull String comment) {
+    public @NotNull String getString(@NotNull String path, @NotNull String def, @NotNull String comment) {
         this.configFile.addDefault(path, def, comment);
-        return this.configFile.getInteger(path, def);
+        return this.configFile.getString(path, def);
     }
 
-    public int getInt(@NotNull String path, int def) {
+    public @NotNull String getString(@NotNull String path, @NotNull String def) {
         this.configFile.addDefault(path, def);
-        return this.configFile.getInteger(path, def);
+        return this.configFile.getString(path, def);
     }
 
-    @NotNull
-    public List<String> getList(@NotNull String path, List<String> def, @NotNull String comment) {
+    public @NotNull List<String> getList(@NotNull String path, List<String> def, @NotNull String comment) {
         this.configFile.addDefault(path, def, comment);
         return this.configFile.getStringList(path);
     }
 
-    @NotNull
-    public List<String> getList(@NotNull String path, List<String> def) {
+    public @NotNull List<String> getList(@NotNull String path, List<String> def) {
         this.configFile.addDefault(path, def);
         return this.configFile.getStringList(path);
     }

@@ -9,7 +9,8 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 
 public class JoinToggle implements ServerRestartModule, Listener {
 
-    public JoinToggle() {}
+    public JoinToggle() {
+    }
 
     @Override
     public boolean shouldEnable() {
@@ -24,7 +25,7 @@ public class JoinToggle implements ServerRestartModule, Listener {
 
     @Override
     public void disable() {
-        HandlerList.unregisterAll();
+        HandlerList.unregisterAll(this);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

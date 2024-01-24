@@ -5,12 +5,13 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
-public class CustomEvent extends Event implements Cancellable {
+public class RestartCountDownEvent extends Event implements Cancellable {
+
     private static final @NotNull HandlerList handlers = new HandlerList();
 
     private boolean isCancelled = false;
 
-    public CustomEvent(boolean isAsync) {
+    public RestartCountDownEvent(boolean isAsync) {
         super(isAsync);
     }
 
