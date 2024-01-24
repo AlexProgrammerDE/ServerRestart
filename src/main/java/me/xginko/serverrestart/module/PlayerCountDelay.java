@@ -49,10 +49,8 @@ public class PlayerCountDelay implements ServerRestartModule, Listener {
     private void onCountdown(RestartCountDownEvent event) {
         if (server.getOnlinePlayers().size() >= minPlayersToDelay) {
             event.setCancelled(true);
-
-            // Broadcast / log
-
-            // Logic for schedule next
+            event.setDelayMillis(delayMillis);
+            // Log
         }
     }
 }

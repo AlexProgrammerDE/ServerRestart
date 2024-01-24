@@ -38,8 +38,12 @@ public final class AsyncHeart implements Runnable {
      */
     @Override
     public void run() {
-        new AsyncHeartbeatEvent(this.LAST_CALL.get(), System.currentTimeMillis()).callEvent();
-        this.LAST_CALL.set(System.currentTimeMillis());
+        if (ServerRestart.isRestarting) {
+            this.HEARTBEAT.cancel(); // Self end
+        } else {
+            new AsyncHeartbeatEvent(this.LAST_CALL.get(), System.currentTimeMillis()).callEvent();
+            this.LAST_CALL.set(System.currentTimeMillis());
+        }
     }
 
     /**

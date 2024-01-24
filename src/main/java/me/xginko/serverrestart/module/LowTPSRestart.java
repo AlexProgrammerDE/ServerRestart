@@ -4,6 +4,7 @@ import me.xginko.serverrestart.ServerRestart;
 import me.xginko.serverrestart.config.Config;
 import me.xginko.serverrestart.event.AsyncHeartbeatEvent;
 import me.xginko.serverrestart.event.ServerRestartEvent;
+import me.xginko.serverrestart.utils.CommonUtil;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
@@ -78,8 +79,8 @@ public class LowTPSRestart implements ServerRestartModule, Listener {
             return;
         }
 
-        ServerRestart.getLog().warning("SERVER ON FIRE! Restarting! - TPS was lower than " + restartTPS
-                +" for " + Duration.ofMillis(maxLagMillis).toString());
+        ServerRestart.getLog().severe("Restarting server because on fire! - TPS was lower than " + restartTPS +
+                " for " + CommonUtil.formatDuration(Duration.ofMillis(maxLagMillis)));
 
         ServerRestart.restart(
                 restartEvent.getMethod(),

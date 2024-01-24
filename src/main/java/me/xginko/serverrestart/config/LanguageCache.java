@@ -2,16 +2,21 @@ package me.xginko.serverrestart.config;
 
 import io.github.thatsmusic99.configurationmaster.api.ConfigFile;
 import me.xginko.serverrestart.ServerRestart;
+import me.xginko.serverrestart.utils.CommonUtil;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.List;
 
 public class LanguageCache {
 
-    private final ConfigFile langFile;
-    public final Component no_permission, server_is_restarting, restart_delayed_playercount, countdown_now, restart_in;
+    private final @NotNull ConfigFile langFile;
+    public final @NotNull Component no_permission, server_is_restarting,
+            restart_delayed_playercount, countdown_now, restart_in;
 
     public LanguageCache(String locale) throws Exception {
         ServerRestart plugin = ServerRestart.getInstance();
@@ -43,22 +48,29 @@ public class LanguageCache {
         }
     }
 
-    public Component getTranslation(String path, String defaultTranslation) {
+    public @NotNull Component restartCountdown(Duration remainingTime) {
+        return this.restart_in.replaceText(TextReplacementConfig.builder()
+                .match("%time%")
+                .replacement(CommonUtil.formatDuration(remainingTime))
+                .build());
+    }
+
+    private @NotNull Component getTranslation(String path, String defaultTranslation) {
         this.langFile.addDefault(path, defaultTranslation);
         return MiniMessage.miniMessage().deserialize(this.langFile.getString(path, defaultTranslation));
     }
 
-    public Component getTranslation(String path, String defaultTranslation, String comment) {
+    private @NotNull Component getTranslation(String path, String defaultTranslation, String comment) {
         this.langFile.addDefault(path, defaultTranslation, comment);
         return MiniMessage.miniMessage().deserialize(this.langFile.getString(path, defaultTranslation));
     }
 
-    public List<Component> getListTranslation(String path, List<String> defaultTranslation) {
+    private @NotNull List<Component> getListTranslation(String path, List<String> defaultTranslation) {
         this.langFile.addDefault(path, defaultTranslation);
         return this.langFile.getStringList(path).stream().map(MiniMessage.miniMessage()::deserialize).toList();
     }
 
-    public List<Component> getListTranslation(String path, List<String> defaultTranslation, String comment) {
+    private @NotNull List<Component> getListTranslation(String path, List<String> defaultTranslation, String comment) {
         this.langFile.addDefault(path, defaultTranslation, comment);
         return this.langFile.getStringList(path).stream().map(MiniMessage.miniMessage()::deserialize).toList();
     }
