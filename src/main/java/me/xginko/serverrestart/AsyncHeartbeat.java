@@ -4,17 +4,21 @@ import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import me.xginko.serverrestart.event.AsyncHeartbeatEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 public final class AsyncHeartbeat implements Runnable {
 
     private final @NotNull ScheduledTask HEARTBEAT;
+    private final @NotNull AtomicLong LAST_CALL;
 
     AsyncHeartbeat(long initialDelayMillis, long intervalMillis) {
+        this.LAST_CALL = new AtomicLong();
         ServerRestart plugin = ServerRestart.getInstance();
         this.HEARTBEAT = plugin.getServer().getAsyncScheduler().runAtFixedRate(
                 plugin,
-                BEAT -> this.run(),
+                BEAT_TASK -> this.run(),
                 initialDelayMillis,
                 intervalMillis,
                 TimeUnit.MILLISECONDS
@@ -34,15 +38,28 @@ public final class AsyncHeartbeat implements Runnable {
      */
     @Override
     public void run() {
-        new AsyncHeartbeatEvent().callEvent();
+        new AsyncHeartbeatEvent(this.LAST_CALL.get(), System.currentTimeMillis()).callEvent();
+        this.LAST_CALL.set(System.currentTimeMillis());
     }
 
     /**
-     * Attempts to cancel the heartbeat, returning the result of the attempt. In all cases, if the heartbeat is currently
-     * being executed no attempt is made to halt the heartbeat, however any executions in the future are halted.
-     * @return the result of the cancellation attempt.
+     * Returns the current execution state of the heartbeat task.
+     * @return the current execution state of the heartbeat task.
      */
-    public @NotNull ScheduledTask.CancelledState stop() {
-        return this.HEARTBEAT.cancel();
+    public @NotNull ScheduledTask.ExecutionState getExecutionState() {
+        return this.HEARTBEAT.getExecutionState();
+    }
+
+    /**
+     * Cancels the heartbeat, only completing once {@link AsyncHeartbeat#getExecutionState()} == {@link ScheduledTask.ExecutionState#CANCELLED}.
+     * If the heartbeat is currently being executed, no attempt is made to interrupt the heartbeat.
+     */
+    public @NotNull CompletableFuture<Void> shutdown() {
+        this.HEARTBEAT.cancel();
+        while (true) {
+            if (this.getExecutionState() == ScheduledTask.ExecutionState.CANCELLED) {
+                return CompletableFuture.completedFuture(null);
+            }
+        }
     }
 }

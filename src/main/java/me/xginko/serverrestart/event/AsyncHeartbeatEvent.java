@@ -7,8 +7,20 @@ import org.jetbrains.annotations.NotNull;
 public class AsyncHeartbeatEvent extends Event {
     private static final @NotNull HandlerList handlers = new HandlerList();
 
-    public AsyncHeartbeatEvent() {
+    private final long lastFinish, start;
+
+    public AsyncHeartbeatEvent(long lastFinish, long start) {
         super(true);
+        this.lastFinish = lastFinish;
+        this.start = start;
+    }
+
+    public long getLastFinishedMillis() {
+        return lastFinish;
+    }
+
+    public long getStartMillis() {
+        return start;
     }
 
     @Override
