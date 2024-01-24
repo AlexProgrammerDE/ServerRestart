@@ -71,19 +71,17 @@ public final class ServerRestart extends JavaPlugin {
             }
         }
 
-        server.getGlobalRegionScheduler().run(instance, shutdown -> {
-            if (saveAll) {
-                server.savePlayers();
-                for (World world : server.getWorlds()) {
-                    world.save();
-                }
+        if (saveAll) {
+            server.savePlayers();
+            for (World world : server.getWorlds()) {
+                world.save();
             }
+        }
 
-            switch (method) {
-                case SPIGOT_RESTART -> server.spigot().restart();
-                case BUKKIT_SHUTDOWN -> server.shutdown();
-            }
-        });
+        switch (method) {
+            case SPIGOT_RESTART -> server.spigot().restart();
+            case BUKKIT_SHUTDOWN -> server.shutdown();
+        }
     }
 
     public static boolean isFolia() {

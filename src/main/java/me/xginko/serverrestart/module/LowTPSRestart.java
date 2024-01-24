@@ -9,16 +9,20 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class LowTPSRestart implements ServerRestartModule, Listener {
 
-    private final AtomicLong consec_millis_spent_lagging;
+    private final AtomicLong millisSpentLagging;
+    private final long maxLagMillis;
+    private final double restartTPS;
     private final boolean safelyRestart;
 
     public LowTPSRestart() {
         shouldEnable();
-        this.consec_millis_spent_lagging = new AtomicLong();
+        this.millisSpentLagging = new AtomicLong();
         Config config = ServerRestart.getConfiguration();
         config.createTitledSection("Fire Extinguisher", "restart-on-low-TPS");
         config.master().addComment("restart-on-low-TPS.enable",
@@ -26,6 +30,10 @@ public class LowTPSRestart implements ServerRestartModule, Listener {
         this.safelyRestart = config.getBoolean("restart-on-low-TPS.restart-gracefully", true, """
                 Will disable joining, kick all players and save everything before restarting.\s
                 If set to false, will just immediately shutdown/restart.""");
+        this.restartTPS = config.getDouble("restart-on-low-TPS.restart-TPS", 12.5,
+                "The tps at which to start taking measures.");
+        this.maxLagMillis = TimeUnit.SECONDS.toMillis(config.getInt("restart-on-low-TPS.min-lag-duration", 10,
+                "How long in seconds the server needs to be lower than the configured tps to restart."));
     }
 
     @Override
@@ -47,14 +55,19 @@ public class LowTPSRestart implements ServerRestartModule, Listener {
     private void onBeat(AsyncHeartbeatEvent event) {
         if (ServerRestart.isRestarting) return;
 
-        // Check tps
+        if (ServerRestart.getTPSCache().getTPS() > restartTPS) {
+            millisSpentLagging.set(0L); // No lag, reset time
+            return;
+        }
 
-        // Check consecutive millis lagging
+        if (millisSpentLagging.addAndGet(System.currentTimeMillis() - event.getLastCallEndTime()) <= maxLagMillis) {
+            return; // Not lagging for long enough yet
+        }
 
         ServerRestartEvent restartEvent = new ServerRestartEvent(
                 true,
                 ServerRestartEvent.RestartType.ON_FIRE,
-                ServerRestart.getConfiguration().METHOD,
+                ServerRestart.getConfiguration().RESTART_METHOD,
                 safelyRestart,
                 safelyRestart,
                 safelyRestart
@@ -63,6 +76,9 @@ public class LowTPSRestart implements ServerRestartModule, Listener {
         if (!restartEvent.callEvent()) {
             return;
         }
+
+        ServerRestart.getLog().warning("SERVER ON FIRE! Restarting! - TPS was lower than " + restartTPS
+                +" for " + Duration.ofMillis(maxLagMillis).toString());
 
         ServerRestart.restart(
                 restartEvent.getMethod(),

@@ -65,7 +65,7 @@ public interface TPSCache {
         public double getTPS() {
             // Get all current regions
             for (final World world : server.getWorlds()) {
-                ((Level) world).getWorld().getHandle().regioniser.computeForAllRegions(regions::add);
+                ((Level) world).getWorld().getHandle().regioniser.computeForAllRegionsUnsynchronised(regions::add);
             }
 
             // Since we only need to check for critically low TPS, this is totally enough to get what we need
