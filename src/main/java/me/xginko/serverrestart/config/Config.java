@@ -3,6 +3,7 @@ package me.xginko.serverrestart.config;
 
 import io.github.thatsmusic99.configurationmaster.api.ConfigFile;
 import me.xginko.serverrestart.ServerRestart;
+import me.xginko.serverrestart.enums.RestartMethod;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -19,6 +20,7 @@ public class Config {
     public final @NotNull ZonedDateTime INIT_TIME;
     public final @NotNull Set<ZonedDateTime> RESTART_TIMES;
     public final @NotNull Locale default_lang;
+    public final @NotNull RestartMethod METHOD;
     public final long max_tps_check_interval_millis, heartbeat_initial_delay_millis, heartbeat_interval_millis;
     public final boolean auto_lang;
 
@@ -40,6 +42,16 @@ public class Config {
 
         // General Settings
         this.createTitledSection("General Settings", "general");
+        RestartMethod method = RestartMethod.BUKKIT_SHUTDOWN;
+        String configuredMethod = getString("general.restart-method", RestartMethod.BUKKIT_SHUTDOWN.name(),
+                "Available options are: " + String.join(", ", Arrays.stream(RestartMethod.values()).map(Enum::name).toList()));
+        try {
+            method = RestartMethod.valueOf(configuredMethod);
+        } catch (IllegalArgumentException e) {
+            ServerRestart.getLog().warning("RestartMethod '"+configuredMethod+"' is not valid. Valid values are: " +
+                    String.join(", ", Arrays.stream(RestartMethod.values()).map(Enum::name).toList()));
+        }
+        this.METHOD = method;
         ZoneId zoneId = ZoneId.systemDefault();
         try {
             zoneId = ZoneId.of(getString("general.timezone", zoneId.getId(),

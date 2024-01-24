@@ -4,7 +4,6 @@ import me.xginko.serverrestart.config.Config;
 import me.xginko.serverrestart.config.LanguageCache;
 import me.xginko.serverrestart.enums.RestartMethod;
 import me.xginko.serverrestart.module.ServerRestartModule;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -32,12 +31,12 @@ public final class ServerRestart extends JavaPlugin {
     private static ServerRestart instance;
     private static HashMap<String, LanguageCache> languageCacheMap;
     private static Config config;
+    private static AsyncHeart asyncHeart;
     private static TPSCache tpsCache;
-    private static AsyncHeartbeat heartbeat;
     private static Server server;
     private static Logger logger;
-    private static boolean isFolia, joiningAllowed;
-    public static boolean isRestarting;
+    private static boolean isFolia;
+    public static boolean isRestarting, joiningAllowed;
 
     @Override
     public void onEnable() {
@@ -56,55 +55,39 @@ public final class ServerRestart extends JavaPlugin {
         reloadConfiguration();
     }
 
-    public static void restartGracefully(RestartMethod mode, boolean kickAll, boolean saveAll, boolean disableJoining) {
+    public static void restart(RestartMethod method, boolean disableJoining, boolean kickAll, boolean saveAll) {
         isRestarting = true;
-        setJoiningAllowed(!disableJoining);
-        if (kickAll) kickAll();
-        if (saveAll) saveAll();
-        restartNow(mode);
-    }
 
-    public static void restartNow(RestartMethod mode) {
-        isRestarting = true;
-        switch (mode) {
-            case SPIGOT_RESTART -> server.spigot().restart();
-            case BUKKIT_SHUTDOWN -> server.shutdown();
+        if (disableJoining) {
+            joiningAllowed = false;
         }
-    }
 
-    public static void kickAll() {
-        for (Player player : server.getOnlinePlayers()) {
-            player.kick(ServerRestart.getLang(player.locale()).server_is_restarting, PlayerKickEvent.Cause.RESTART_COMMAND);
+        if (kickAll) {
+            for (Player player : server.getOnlinePlayers()) {
+                player.getScheduler().run(instance, kick -> player.kick(
+                        ServerRestart.getLang(player.locale()).server_is_restarting,
+                        PlayerKickEvent.Cause.RESTART_COMMAND
+                ), null);
+            }
         }
-    }
 
-    public static void saveAll() {
-        for (World world : server.getWorlds()) {
-            world.save();
-        }
-        server.savePlayers();
-    }
+        server.getGlobalRegionScheduler().run(instance, shutdown -> {
+            if (saveAll) {
+                server.savePlayers();
+                for (World world : server.getWorlds()) {
+                    world.save();
+                }
+            }
 
-    public static void broadcastRestart() {
-        if (!config.auto_lang) {
-            server.broadcast(Component.empty());
-            return;
-        }
-        for (Player player : server.getOnlinePlayers()) {
-            player.sendMessage(Component.empty());
-        }
+            switch (method) {
+                case SPIGOT_RESTART -> server.spigot().restart();
+                case BUKKIT_SHUTDOWN -> server.shutdown();
+            }
+        });
     }
 
     public static boolean isFolia() {
         return isFolia;
-    }
-
-    public static boolean isJoiningAllowed() {
-        return joiningAllowed;
-    }
-
-    public static void setJoiningAllowed(boolean allowed) {
-        joiningAllowed = allowed;
     }
 
     public static ServerRestart getInstance() {
@@ -148,9 +131,9 @@ public final class ServerRestart extends JavaPlugin {
 
     private void reloadConfiguration() {
         try {
-            heartbeat.shutdown().get();
+            if (asyncHeart != null) asyncHeart.stop().get();
             config = new Config();
-            heartbeat = new AsyncHeartbeat(config.heartbeat_initial_delay_millis, config.heartbeat_interval_millis);
+            asyncHeart = new AsyncHeart(config.heartbeat_initial_delay_millis, config.heartbeat_interval_millis);
             tpsCache = TPSCache.create(Duration.ofMillis(config.max_tps_check_interval_millis));
             ServerRestartModule.reloadModules();
             config.saveConfig();

@@ -8,12 +8,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class AsyncHeartbeat implements Runnable {
+public final class AsyncHeart implements Runnable {
 
     private final @NotNull ScheduledTask HEARTBEAT;
     private final @NotNull AtomicLong LAST_CALL;
 
-    AsyncHeartbeat(long initialDelayMillis, long intervalMillis) {
+    AsyncHeart(long initialDelayMillis, long intervalMillis) {
         this.LAST_CALL = new AtomicLong();
         ServerRestart plugin = ServerRestart.getInstance();
         this.HEARTBEAT = plugin.getServer().getAsyncScheduler().runAtFixedRate(
@@ -51,10 +51,10 @@ public final class AsyncHeartbeat implements Runnable {
     }
 
     /**
-     * Cancels the heartbeat, only completing once {@link AsyncHeartbeat#getExecutionState()} == {@link ScheduledTask.ExecutionState#CANCELLED}.
+     * Cancels the heartbeat, only completing once {@link AsyncHeart#getExecutionState()} == {@link ScheduledTask.ExecutionState#CANCELLED}.
      * If the heartbeat is currently being executed, no attempt is made to interrupt the heartbeat.
      */
-    public @NotNull CompletableFuture<Void> shutdown() {
+    public @NotNull CompletableFuture<Void> stop() {
         this.HEARTBEAT.cancel();
         while (true) {
             if (this.getExecutionState() == ScheduledTask.ExecutionState.CANCELLED) {

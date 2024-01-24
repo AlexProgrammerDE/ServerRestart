@@ -11,14 +11,14 @@ public class ServerRestartEvent extends Event implements Cancellable {
 
     private final @NotNull RestartType restartType;
     private @NotNull RestartMethod restartMethod;
-    private boolean kickAll, saveAll, disableJoining, isCancelled;
+    private boolean disableJoining, kickAll, saveAll, isCancelled;
 
     /**
      * Called right before the restart/shutdown methods are executed.
      */
     public ServerRestartEvent(
             boolean isAsync, @NotNull RestartType restartType, @NotNull RestartMethod restartMethod,
-            boolean kickAll, boolean saveAll, boolean disableJoining
+            boolean disableJoining, boolean kickAll, boolean saveAll
     ) {
         super(isAsync);
         this.isCancelled = false;
@@ -29,19 +29,19 @@ public class ServerRestartEvent extends Event implements Cancellable {
         this.disableJoining = disableJoining;
     }
 
-    public @NotNull RestartType getReason() {
+    public @NotNull RestartType getType() {
         return restartType;
     }
 
-    public @NotNull RestartMethod getRestartType() {
+    public @NotNull RestartMethod getMethod() {
         return restartMethod;
     }
 
-    public void setRestartType(@NotNull RestartMethod restartType) {
+    public void setMethod(@NotNull RestartMethod restartType) {
         this.restartMethod = restartType;
     }
 
-    public boolean shouldKickAll() {
+    public boolean getKickAll() {
         return kickAll;
     }
 
@@ -49,7 +49,7 @@ public class ServerRestartEvent extends Event implements Cancellable {
         this.kickAll = kickAll;
     }
 
-    public boolean shouldSaveAll() {
+    public boolean getSaveAll() {
         return saveAll;
     }
 
@@ -57,7 +57,7 @@ public class ServerRestartEvent extends Event implements Cancellable {
         this.saveAll = saveAll;
     }
 
-    public boolean shouldDisableJoin() {
+    public boolean getDisableJoin() {
         return disableJoining;
     }
 

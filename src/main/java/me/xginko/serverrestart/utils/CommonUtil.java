@@ -6,7 +6,7 @@ import java.time.Duration;
 
 public class CommonUtil {
 
-    public static @NotNull String formatTime(Duration duration) {
+    public static @NotNull String formatDuration(Duration duration) {
         final int seconds = duration.toSecondsPart();
         final int minutes = duration.toMinutesPart();
         final int hours = duration.toHoursPart();

@@ -30,7 +30,7 @@ public class JoinToggle implements ServerRestartModule, Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent event) {
-        if (!ServerRestart.isJoiningAllowed() || ServerRestart.isRestarting) {
+        if (!ServerRestart.joiningAllowed || ServerRestart.isRestarting) {
             event.disallow(
                     AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
                     ServerRestart.getLang(ServerRestart.getConfiguration().default_lang).server_is_restarting
