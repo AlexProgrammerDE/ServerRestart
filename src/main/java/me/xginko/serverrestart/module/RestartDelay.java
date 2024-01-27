@@ -2,7 +2,7 @@ package me.xginko.serverrestart.module;
 
 import me.xginko.serverrestart.ServerRestart;
 import me.xginko.serverrestart.config.Config;
-import me.xginko.serverrestart.event.RestartCountDownEvent;
+import me.xginko.serverrestart.event.AsyncPreCountDownEvent;
 import org.bukkit.Server;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -11,13 +11,13 @@ import org.bukkit.event.Listener;
 
 import java.util.concurrent.TimeUnit;
 
-public class PlayerCountDelay implements ServerRestartModule, Listener {
+public class RestartDelay implements ServerRestartModule, Listener {
 
     private final Server server;
     private final long delayMillis;
     private final int minPlayersToDelay;
 
-    public PlayerCountDelay() {
+    public RestartDelay() {
         shouldEnable();
         this.server = ServerRestart.getInstance().getServer();
         Config config = ServerRestart.getConfiguration();
@@ -46,7 +46,7 @@ public class PlayerCountDelay implements ServerRestartModule, Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    private void onCountdown(RestartCountDownEvent event) {
+    private void onCountdown(AsyncPreCountDownEvent event) {
         if (server.getOnlinePlayers().size() >= minPlayersToDelay) {
             event.setCancelled(true);
             event.setDelayMillis(delayMillis);

@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 public class Config {
 
     private final @NotNull ConfigFile configFile;
+    public final @NotNull ZoneId timeZone;
     public final @NotNull ZonedDateTime INIT_TIME;
     public final @NotNull Set<ZonedDateTime> RESTART_TIMES;
     public final @NotNull Locale default_lang;
@@ -28,7 +29,7 @@ public class Config {
         // Create plugin folder first if it does not exist yet
         File pluginFolder = ServerRestart.getInstance().getDataFolder();
         if (!pluginFolder.exists() && !pluginFolder.mkdir())
-            ServerRestart.getLog().severe("Failed to create plugin folder.");
+            ServerRestart.getLog().error("Failed to create plugin folder.");
         // Load config.yml with ConfigMaster
         this.configFile = ConfigFile.loadConfig(new File(pluginFolder, "config.yml"));
 
@@ -48,7 +49,7 @@ public class Config {
         try {
             method = RestartMethod.valueOf(configuredMethod);
         } catch (IllegalArgumentException e) {
-            ServerRestart.getLog().warning("RestartMethod '"+configuredMethod+"' is not valid. Valid values are: " +
+            ServerRestart.getLog().warn("RestartMethod '"+configuredMethod+"' is not valid. Valid values are: " +
                     String.join(", ", Arrays.stream(RestartMethod.values()).map(Enum::name).toList()));
         }
         this.RESTART_METHOD = method;
@@ -57,10 +58,11 @@ public class Config {
             zoneId = ZoneId.of(getString("general.timezone", zoneId.getId(),
                     "The TimeZone (ZoneId) to use for scheduling restart times."));
         } catch (ZoneRulesException e) {
-            ServerRestart.getLog().warning("Configured timezone could not be found. Using host zone '"+zoneId+"' (System Default)");
+            ServerRestart.getLog().warn("Configured timezone could not be found. Using host zone '"+zoneId+"' (System Default)");
         } catch (DateTimeException e) {
-            ServerRestart.getLog().warning("Configured timezone has an invalid format. Using '"+zoneId+"' (System Default)");
+            ServerRestart.getLog().warn("Configured timezone has an invalid format. Using '"+zoneId+"' (System Default)");
         }
+        this.timeZone = zoneId;
         this.INIT_TIME = ZonedDateTime.now(zoneId);
         this.max_tps_check_interval_millis = Math.max(getInt("general.tps-cache-time-ticks", 40,
                 "How long a checked tps is cached to save resources in ticks (1 sec = 20 ticks)"), 20) * 50L;
@@ -80,7 +82,7 @@ public class Config {
                                 Integer.parseInt(numbers[1]),
                                 Integer.parseInt(numbers[2]));
                     } catch (Exception e) {
-                        ServerRestart.getLog().warning("Restart time '"+timeString+"' is not formatted properly. " +
+                        ServerRestart.getLog().warn("Restart time '"+timeString+"' is not formatted properly. " +
                                 "Format: 23:59:59 -> hour:minute:second");
                         return null;
                     }
@@ -90,7 +92,7 @@ public class Config {
         if (this.RESTART_TIMES.isEmpty()) {
             final ZonedDateTime am2zoned = this.getRestartTime(2,30,0);
             this.RESTART_TIMES.add(am2zoned);
-            ServerRestart.getLog().warning("Queued 1 restart for " + am2zoned + " due to restart times being invalid or empty.");
+            ServerRestart.getLog().warn("Queued 1 restart for " + am2zoned + " due to restart times being invalid or empty.");
         }
 
 
@@ -107,7 +109,7 @@ public class Config {
         try {
             this.configFile.save();
         } catch (Exception e) {
-            ServerRestart.getLog().severe("Failed to save config file! - " + e.getLocalizedMessage());
+            ServerRestart.getLog().error("Failed to save config file! - " + e.getLocalizedMessage());
         }
     }
 

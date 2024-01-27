@@ -1,9 +1,11 @@
 package me.xginko.serverrestart;
 
+import me.xginko.serverrestart.commands.RestartsCmd;
 import me.xginko.serverrestart.config.Config;
 import me.xginko.serverrestart.config.LanguageCache;
 import me.xginko.serverrestart.enums.RestartMethod;
 import me.xginko.serverrestart.module.ServerRestartModule;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -15,12 +17,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Duration;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 import java.util.jar.JarFile;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -29,20 +27,19 @@ import java.util.zip.ZipEntry;
 public final class ServerRestart extends JavaPlugin {
 
     private static ServerRestart instance;
-    private static HashMap<String, LanguageCache> languageCacheMap;
-    private static Config config;
     private static AsyncHeart asyncHeart;
-    private static TPSCache tpsCache;
+    private static Config config;
     private static Server server;
-    private static Logger logger;
-    private static boolean isFolia;
-    public static boolean isRestarting, joiningAllowed;
+    private static ComponentLogger logger;
+    private static CachedTickData cachedTickData;
+    private static Map<String, LanguageCache> languageCacheMap;
+    public static boolean isFolia, isRestarting, joiningAllowed;
 
     @Override
     public void onEnable() {
         isFolia = joiningAllowed = isRestarting = false;
         instance = this;
-        logger = getLogger();
+        logger = getComponentLogger();
         server = getServer();
 
         try {
@@ -53,6 +50,7 @@ public final class ServerRestart extends JavaPlugin {
 
         reloadLang();
         reloadConfiguration();
+        getCommand("restarts").setExecutor(new RestartsCmd());
     }
 
     public static void restart(RestartMethod method, boolean disableJoining, boolean kickAll, boolean saveAll) {
@@ -65,7 +63,7 @@ public final class ServerRestart extends JavaPlugin {
         if (kickAll) {
             for (Player player : server.getOnlinePlayers()) {
                 player.getScheduler().run(instance, kick -> player.kick(
-                        ServerRestart.getLang(player.locale()).server_is_restarting,
+                        ServerRestart.getLang(player.locale()).server_restarting,
                         PlayerKickEvent.Cause.RESTART_COMMAND
                 ), null);
             }
@@ -84,10 +82,6 @@ public final class ServerRestart extends JavaPlugin {
         }
     }
 
-    public static boolean isFolia() {
-        return isFolia;
-    }
-
     public static ServerRestart getInstance() {
         return instance;
     }
@@ -96,11 +90,11 @@ public final class ServerRestart extends JavaPlugin {
         return config;
     }
 
-    public static TPSCache getTPSCache() {
-        return tpsCache;
+    public static CachedTickData getTickData() {
+        return cachedTickData;
     }
 
-    public static Logger getLog() {
+    public static ComponentLogger getLog() {
         return logger;
     }
 
@@ -129,14 +123,15 @@ public final class ServerRestart extends JavaPlugin {
 
     private void reloadConfiguration() {
         try {
-            if (asyncHeart != null) asyncHeart.stop().get();
+            if (asyncHeart != null)
+                asyncHeart.stop().get();
             config = new Config();
+            cachedTickData = CachedTickData.expireAfter(Duration.ofMillis(config.max_tps_check_interval_millis));
             asyncHeart = new AsyncHeart(config.heartbeat_initial_delay_millis, config.heartbeat_interval_millis);
-            tpsCache = TPSCache.create(Duration.ofMillis(config.max_tps_check_interval_millis));
             ServerRestartModule.reloadModules();
             config.saveConfig();
         } catch (Exception e) {
-            logger.severe("Error loading config! - " + e.getLocalizedMessage());
+            logger.error("Error loading config! - " + e.getLocalizedMessage());
             e.printStackTrace();
         }
     }
@@ -163,7 +158,7 @@ public final class ServerRestart extends JavaPlugin {
                 }
             }
         } catch (Exception e) {
-            logger.severe("Error loading language files! Language files will not reload to avoid errors, make sure to correct this before restarting the server!");
+            logger.error("Error loading language files! Language files will not reload to avoid errors, make sure to correct this before restarting the server!");
             e.printStackTrace();
         }
     }
@@ -175,7 +170,7 @@ public final class ServerRestart extends JavaPlugin {
                     .filter(name -> name.startsWith("lang" + File.separator) && name.endsWith(".yml"))
                     .collect(Collectors.toSet());
         } catch (IOException e) {
-            logger.severe("Failed getting default lang files! - " + e.getLocalizedMessage());
+            logger.error("Failed getting default lang files! - " + e.getLocalizedMessage());
             return Collections.emptySet();
         }
     }

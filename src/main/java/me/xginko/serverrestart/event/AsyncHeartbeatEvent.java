@@ -7,16 +7,16 @@ import org.jetbrains.annotations.NotNull;
 public class AsyncHeartbeatEvent extends Event {
     private static final @NotNull HandlerList handlers = new HandlerList();
 
-    private final long lastFinish, callTime;
+    private final long postLastCall, callTime;
 
-    public AsyncHeartbeatEvent(long lastFinish, long callTime) {
+    public AsyncHeartbeatEvent(long postLastCall, long callTime) {
         super(true);
-        this.lastFinish = lastFinish;
+        this.postLastCall = postLastCall;
         this.callTime = callTime;
     }
 
-    public long getLastCallEndTime() {
-        return lastFinish;
+    public long getPostLastCallTime() {
+        return postLastCall;
     }
 
     public long getCallTime() {

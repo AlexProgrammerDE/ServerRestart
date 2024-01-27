@@ -1,5 +1,15 @@
 name: ServerRestart
 version: '${version}'
 main: me.xginko.serverrestart.ServerRestart
-api-version: '1.20'
-load: STARTUP
+authors: [ xGinko ]
+description: '${description}'
+api-version: '1.19'
+folia-supported: true
+load: POSTWORLD
+
+commands:
+  restarts:
+    usage: /restarts [ reload, version, disable ]
+    description: ServerRestart admin commands
+    aliases:
+      - sr

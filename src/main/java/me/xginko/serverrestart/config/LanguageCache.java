@@ -15,7 +15,7 @@ import java.util.List;
 public class LanguageCache {
 
     private final @NotNull ConfigFile langFile;
-    public final @NotNull Component no_permission, server_is_restarting,
+    public final @NotNull Component no_permission, server_restarting, server_restarting_on_fire,
             restart_delayed_playercount, countdown_now, restart_in;
 
     public LanguageCache(String locale) throws Exception {
@@ -24,7 +24,7 @@ public class LanguageCache {
         // Check if the lang folder has already been created
         File parent = langYML.getParentFile();
         if (!parent.exists() && !parent.mkdir())
-            ServerRestart.getLog().severe("Unable to create lang directory.");
+            ServerRestart.getLog().error("Unable to create lang directory.");
         // Check if the file already exists and save the one from the plugins resources folder if it does not
         if (!langYML.exists())
             plugin.saveResource("lang" + File.separator + locale + ".yml", false);
@@ -33,7 +33,9 @@ public class LanguageCache {
 
         this.no_permission = getTranslation("messages.no-permission",
                 "<red>You don't have permission to use this command.");
-        this.server_is_restarting = getTranslation("messages.server-is-restarting",
+        this.server_restarting = getTranslation("messages.server-restarting",
+                "<gold>Server is restarting and will be back in a few minutes.");
+        this.server_restarting_on_fire = getTranslation("messages.server-restarting",
                 "<gold>Server is restarting and will be back in a few minutes.");
         this.restart_delayed_playercount = getTranslation("messages.restart-delayed-high-playercount",
                 "<gray>Delaying restart for %time% due to high playercount.");
@@ -44,7 +46,7 @@ public class LanguageCache {
         try {
             this.langFile.save();
         } catch (Exception e) {
-            ServerRestart.getLog().severe("Failed to save language file: "+ langYML.getName() +" - " + e.getLocalizedMessage());
+            ServerRestart.getLog().error("Failed to save language file: "+ langYML.getName() +" - " + e.getLocalizedMessage());
         }
     }
 

@@ -15,8 +15,9 @@ public interface ServerRestartModule {
         modules.clear();
 
         modules.add(new JoinToggle());
-        modules.add(new LowTPSRestart());
-        modules.add(new PlayerCountDelay());
+        modules.add(new FireWatch());
+        modules.add(new RestartDelay());
+        modules.add(new RestartTimer());
 
         for (ServerRestartModule module : modules) {
             if (module.shouldEnable()) module.enable();

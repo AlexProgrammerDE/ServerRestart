@@ -9,8 +9,7 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 
 public class JoinToggle implements ServerRestartModule, Listener {
 
-    public JoinToggle() {
-    }
+    public JoinToggle() {}
 
     @Override
     public boolean shouldEnable() {
@@ -33,7 +32,7 @@ public class JoinToggle implements ServerRestartModule, Listener {
         if (!ServerRestart.joiningAllowed || ServerRestart.isRestarting) {
             event.disallow(
                     AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-                    ServerRestart.getLang(ServerRestart.getConfiguration().default_lang).server_is_restarting
+                    ServerRestart.getLang(ServerRestart.getConfiguration().default_lang).server_restarting
             );
         }
     }

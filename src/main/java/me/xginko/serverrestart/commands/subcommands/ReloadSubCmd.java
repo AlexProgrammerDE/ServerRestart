@@ -11,28 +11,29 @@ import org.bukkit.command.CommandSender;
 public class ReloadSubCmd extends SubCommand {
 
     @Override
-    public String getLabel() {
+    public String label() {
         return "reload";
     }
 
     @Override
-    public TextComponent getDescription() {
-        return Component.text("Reload the plugin configuration.").color(NamedTextColor.GRAY);
+    public TextComponent description() {
+        return Component.text("Reloads the plugin.").color(NamedTextColor.GRAY);
     }
 
     @Override
-    public TextComponent getSyntax() {
+    public TextComponent syntax() {
         return Component.text("/restarts reload").color(NamedTextColor.WHITE);
     }
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (sender.hasPermission(Permissions.RELOAD.get())) {
-            sender.sendMessage(Component.text("Reloading VillagerOptimizer...").color(NamedTextColor.WHITE));
-            ServerRestart.getInstance().reloadPlugin();
-            sender.sendMessage(Component.text("Reload complete.").color(NamedTextColor.GREEN));
-        } else {
+        if (!sender.hasPermission(Permissions.RELOAD.get())) {
             sender.sendMessage(ServerRestart.getLang(sender).no_permission);
+            return;
         }
+
+        sender.sendMessage(Component.text("Reloading "+ServerRestart.getInstance().getPluginMeta().getName()+"...").color(NamedTextColor.WHITE));
+        ServerRestart.getInstance().reloadPlugin();
+        sender.sendMessage(Component.text("Reload complete.").color(NamedTextColor.GREEN));
     }
 }
