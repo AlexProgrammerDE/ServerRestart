@@ -5,5 +5,5 @@ messages:
   restart-delayed-high-playercount: "<gray>Delaying restart for %time% due to high playercount."
 
 countdown:
-  15min: "<gold>Server restarting in %time%!"
-  now: "<bold><red>Restarting now"
+  timed: "<gold>Server restarting in %time%"
+  now: "<bold><red>Restarting now!"

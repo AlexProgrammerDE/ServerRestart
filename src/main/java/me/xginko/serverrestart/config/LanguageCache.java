@@ -50,7 +50,7 @@ public class LanguageCache {
         }
     }
 
-    public @NotNull Component restartCountdown(Duration remainingTime) {
+    public @NotNull Component time_until_restart(final Duration remainingTime) {
         return this.restart_in.replaceText(TextReplacementConfig.builder()
                 .match("%time%")
                 .replacement(CommonUtil.formatDuration(remainingTime))

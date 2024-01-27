@@ -18,7 +18,6 @@ public class Config {
 
     private final @NotNull ConfigFile configFile;
     public final @NotNull ZoneId timeZone;
-    public final @NotNull ZonedDateTime INIT_TIME;
     public final @NotNull Set<ZonedDateTime> RESTART_TIMES;
     public final @NotNull Locale default_lang;
     public final @NotNull RestartMethod RESTART_METHOD;
@@ -43,16 +42,22 @@ public class Config {
 
         // General Settings
         this.createTitledSection("General Settings", "general");
+        this.max_tps_check_interval_millis = Math.max(getInt("general.tps-cache-time-ticks", 40,
+                "How long a checked tps is cached to save resources in ticks (1 sec = 20 ticks)"), 20) * 50L;
+        this.heartbeat_initial_delay_millis = getInt("general.heartbeat.initial-delay-millis", 5000);
+        this.heartbeat_interval_millis = getInt("general.heartbeat.interval-millis", 1000);
+
         RestartMethod method = RestartMethod.BUKKIT_SHUTDOWN;
         String configuredMethod = getString("general.restart-method", RestartMethod.BUKKIT_SHUTDOWN.name(),
                 "Available options are: " + String.join(", ", Arrays.stream(RestartMethod.values()).map(Enum::name).toList()));
         try {
             method = RestartMethod.valueOf(configuredMethod);
         } catch (IllegalArgumentException e) {
-            ServerRestart.getLog().warn("RestartMethod '"+configuredMethod+"' is not valid. Valid values are: " +
-                    String.join(", ", Arrays.stream(RestartMethod.values()).map(Enum::name).toList()));
+            ServerRestart.getLog().warn("RestartMethod '"+configuredMethod+"' is not a valid method. Valid methods are as follows: ");
+            ServerRestart.getLog().warn(String.join(", ", Arrays.stream(RestartMethod.values()).map(Enum::name).toList()));
         }
         this.RESTART_METHOD = method;
+
         ZoneId zoneId = ZoneId.systemDefault();
         try {
             zoneId = ZoneId.of(getString("general.timezone", zoneId.getId(),
@@ -63,11 +68,6 @@ public class Config {
             ServerRestart.getLog().warn("Configured timezone has an invalid format. Using '"+zoneId+"' (System Default)");
         }
         this.timeZone = zoneId;
-        this.INIT_TIME = ZonedDateTime.now(zoneId);
-        this.max_tps_check_interval_millis = Math.max(getInt("general.tps-cache-time-ticks", 40,
-                "How long a checked tps is cached to save resources in ticks (1 sec = 20 ticks)"), 20) * 50L;
-        this.heartbeat_initial_delay_millis = getInt("general.heartbeat.initial-delay-millis", 5000);
-        this.heartbeat_interval_millis = getInt("general.heartbeat.interval-millis", 1000);
 
         // Restart times
         this.createTitledSection("Restart Times", "restart-times");
@@ -94,13 +94,12 @@ public class Config {
             this.RESTART_TIMES.add(am2zoned);
             ServerRestart.getLog().warn("Queued 1 restart for " + am2zoned + " due to restart times being invalid or empty.");
         }
-
-
     }
 
     private @NotNull ZonedDateTime getRestartTime(int hours, int minutes, int seconds) throws DateTimeException {
-        ZonedDateTime nextRestart = this.INIT_TIME.withHour(hours).withMinute(minutes).withSecond(seconds);
-        if (this.INIT_TIME.isAfter(nextRestart) || this.INIT_TIME.isEqual(nextRestart))
+        ZonedDateTime now = ZonedDateTime.now(timeZone);
+        ZonedDateTime nextRestart = now.withHour(hours).withMinute(minutes).withSecond(seconds);
+        if (now.isAfter(nextRestart) || now.isEqual(nextRestart))
             return nextRestart.plusDays(1);
         return nextRestart;
     }
