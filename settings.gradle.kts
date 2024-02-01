@@ -1,0 +1,44 @@
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
+pluginManagement {
+    plugins {
+        id("io.papermc.paperweight.userdev") version "1.5.11"
+    }
+}
+
+plugins {
+    id("com.gradle.enterprise") version "3.16.1"
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.7.0"
+}
+
+dependencyResolutionManagement {
+    @Suppress("UnstableAPIUsage")
+    repositories {
+        maven("https://nexus.velocitypowered.com/repository/maven-public/") {
+            name = "velocity-repo"
+        }
+        maven("https://repo.papermc.io/repository/maven-public/") {
+            name = "papermc-repo"
+        }
+        maven("https://ci.pluginwiki.us/plugin/repository/everything/") {
+            name = "configmaster-repo"
+        }
+        maven("https://repo.aikar.co/content/groups/aikar/") {
+            name = "aikar-repo"
+        }
+        mavenCentral()
+    }
+}
+
+rootProject.name = "ServerRestart"
+
+gradleEnterprise {
+    buildScan {
+        if (!System.getenv("CI").isNullOrEmpty()) {
+            termsOfServiceUrl = "https://gradle.com/terms-of-service"
+            termsOfServiceAgree = "yes"
+        }
+    }
+}
+
+include("common", "folia", "paper", "velocity")
