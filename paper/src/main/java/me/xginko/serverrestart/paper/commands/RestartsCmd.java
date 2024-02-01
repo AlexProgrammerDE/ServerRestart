@@ -1,10 +1,10 @@
 package me.xginko.serverrestart.paper.commands;
 
+import me.xginko.serverrestart.common.SRPermission;
 import me.xginko.serverrestart.paper.ServerRestart;
 import me.xginko.serverrestart.paper.commands.subcommands.DisableSubCmd;
 import me.xginko.serverrestart.paper.commands.subcommands.ReloadSubCmd;
 import me.xginko.serverrestart.paper.commands.subcommands.VersionSubCmd;
-import me.xginko.serverrestart.paper.enums.Permissions;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
@@ -57,7 +57,7 @@ public class RestartsCmd implements TabCompleter, CommandExecutor {
     }
 
     private void showCmdHelp(CommandSender sender) {
-        if (Arrays.stream(Permissions.values()).noneMatch(perm -> sender.hasPermission(perm.get()))) return;
+        if (Arrays.stream(SRPermission.values()).noneMatch(perm -> sender.hasPermission(perm.permission()))) return;
 
         sender.sendMessage(Component.text("-----------------------------------------------------").color(NamedTextColor.GRAY));
         sender.sendMessage(Component.text(ServerRestart.getInstance().getPluginMeta().getName() + " Commands").color(NamedTextColor.GOLD));

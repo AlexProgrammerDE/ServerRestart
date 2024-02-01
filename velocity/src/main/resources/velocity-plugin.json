@@ -1,0 +1,10 @@
+{
+  "id": "serverrestart",
+  "name": "ServerRestart",
+  "version": "${version}",
+  "description": "${description}",
+  "authors": ["xGinko"],
+  "dependencies": [],
+  "website": "${url}",
+  "main": "me.xginko.serverrestart.velocity.ServerRestartVelocity"
+}

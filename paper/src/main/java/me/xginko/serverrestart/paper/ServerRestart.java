@@ -1,11 +1,11 @@
 package me.xginko.serverrestart.paper;
 
-import me.xginko.serverrestart.paper.commands.RestartsCmd;
 import me.xginko.serverrestart.common.CachedTickReport;
-import me.xginko.serverrestart.paper.config.PaperConfigImpl;
-import me.xginko.serverrestart.paper.config.LanguageCache;
-import me.xginko.serverrestart.paper.enums.RestartMethod;
 import me.xginko.serverrestart.folia.FoliaTickReport;
+import me.xginko.serverrestart.paper.commands.RestartsCmd;
+import me.xginko.serverrestart.paper.config.PaperConfigCache;
+import me.xginko.serverrestart.paper.config.PaperLangCache;
+import me.xginko.serverrestart.paper.enums.RestartMethod;
 import me.xginko.serverrestart.paper.module.ServerRestartModule;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Server;
@@ -18,7 +18,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.time.Duration;
 import java.util.*;
 import java.util.jar.JarFile;
 import java.util.regex.Matcher;
@@ -29,8 +28,8 @@ import java.util.zip.ZipEntry;
 public final class ServerRestart extends JavaPlugin {
 
     private static ServerRestart instance;
-    private static PaperConfigImpl config;
-    private static Map<String, LanguageCache> languageCacheMap;
+    private static PaperConfigCache config;
+    private static Map<String, PaperLangCache> languageCacheMap;
     private static Server server;
     private static CachedTickReport cachedTickReport;
     private static ComponentLogger logger;
@@ -87,7 +86,7 @@ public final class ServerRestart extends JavaPlugin {
         return instance;
     }
 
-    public static PaperConfigImpl getConfiguration() {
+    public static PaperConfigCache getConfiguration() {
         return config;
     }
 
@@ -99,15 +98,15 @@ public final class ServerRestart extends JavaPlugin {
         return logger;
     }
 
-    public static LanguageCache getLang(Locale locale) {
+    public static PaperLangCache getLang(Locale locale) {
         return getLang(locale.toString().toLowerCase());
     }
 
-    public static LanguageCache getLang(CommandSender commandSender) {
+    public static PaperLangCache getLang(CommandSender commandSender) {
         return commandSender instanceof Player player ? getLang(player.locale()) : getLang(config.default_lang);
     }
 
-    public static LanguageCache getLang(String lang) {
+    public static PaperLangCache getLang(String lang) {
         if (!config.auto_lang) return languageCacheMap.get(config.default_lang.toString().toLowerCase());
         return languageCacheMap.getOrDefault(lang.replace("-", "_"), languageCacheMap.get(config.default_lang.toString().toLowerCase()));
     }
@@ -124,9 +123,8 @@ public final class ServerRestart extends JavaPlugin {
 
     private void reloadConfiguration() {
         try {
-            config = new PaperConfigImpl(this.getDataFolder());
-            if (isFolia) cachedTickReport = new FoliaTickReport(this, Duration.ofMillis(config.max_tps_check_interval_millis));
-            else cachedTickReport = new PaperTickReport(this, Duration.ofMillis(config.max_tps_check_interval_millis));
+            config = new PaperConfigCache(this.getDataFolder());
+            cachedTickReport = isFolia ? new FoliaTickReport(this, config.tick_report_cache_time) : new PaperTickReport(this, config.tick_report_cache_time);
             ServerRestartModule.reloadModules();
             config.saveConfig();
         } catch (Exception e) {
@@ -143,7 +141,7 @@ public final class ServerRestart extends JavaPlugin {
             for (String fileName : getDefaultLanguageFiles()) {
                 final String localeString = fileName.substring(fileName.lastIndexOf(File.separator) + 1, fileName.lastIndexOf('.'));
                 logger.info("Found language file for " + localeString);
-                languageCacheMap.put(localeString, new LanguageCache(localeString));
+                languageCacheMap.put(localeString, new PaperLangCache(localeString));
             }
             final Pattern langPattern = Pattern.compile("([a-z]{1,3}_[a-z]{1,3})(\\.yml)", Pattern.CASE_INSENSITIVE);
             for (File langFile : langDirectory.listFiles()) {
@@ -152,7 +150,7 @@ public final class ServerRestart extends JavaPlugin {
                     String localeString = langMatcher.group(1).toLowerCase();
                     if (!languageCacheMap.containsKey(localeString)) { // make sure it wasn't a default file that we already loaded
                         logger.info("Found language file for "+ localeString);
-                        languageCacheMap.put(localeString, new LanguageCache(localeString));
+                        languageCacheMap.put(localeString, new PaperLangCache(localeString));
                     }
                 }
             }

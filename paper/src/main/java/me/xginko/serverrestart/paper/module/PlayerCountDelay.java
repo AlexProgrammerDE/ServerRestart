@@ -2,7 +2,7 @@ package me.xginko.serverrestart.paper.module;
 
 import me.xginko.serverrestart.paper.ServerRestart;
 import me.xginko.serverrestart.common.CommonUtil;
-import me.xginko.serverrestart.paper.config.PaperConfigImpl;
+import me.xginko.serverrestart.paper.config.PaperConfigCache;
 import me.xginko.serverrestart.paper.event.PreRestartEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -25,7 +25,7 @@ public class PlayerCountDelay implements ServerRestartModule, Listener {
     public PlayerCountDelay() {
         shouldEnable();
         this.server = ServerRestart.getInstance().getServer();
-        PaperConfigImpl config = ServerRestart.getConfiguration();
+        PaperConfigCache config = ServerRestart.getConfiguration();
         config.master().addComment("restart-delay.player-count.enable",
                 "If enabled, will only restart once playercount is below the configured number.");
         this.should_log = config.getBoolean("restart-delay.player-count.log", true);

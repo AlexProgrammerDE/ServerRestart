@@ -7,7 +7,7 @@ import java.time.DateTimeException;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-public interface RestartConfig {
+public interface ConfigCache {
 
     @NotNull ZonedDateTime getRestartTime(int hours, int minutes, int seconds) throws DateTimeException;
     void saveConfig();

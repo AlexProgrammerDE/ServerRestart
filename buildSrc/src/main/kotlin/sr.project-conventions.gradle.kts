@@ -24,5 +24,12 @@ tasks {
                 "url" to "https://github.com/xGinko/ServerRestart"
             )
         }
+        filesMatching("**/velocity-plugin.json") {
+            expand(
+                "version" to project.version,
+                "description" to project.description,
+                "url" to "https://github.com/xGinko/ServerRestart"
+            )
+        }
     }
 }

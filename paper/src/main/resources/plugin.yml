@@ -3,6 +3,7 @@ version: '${version}'
 main: me.xginko.serverrestart.ServerRestart
 authors: [ xGinko ]
 description: '${description}'
+website: '${url}'
 api-version: '1.19'
 folia-supported: true
 load: POSTWORLD

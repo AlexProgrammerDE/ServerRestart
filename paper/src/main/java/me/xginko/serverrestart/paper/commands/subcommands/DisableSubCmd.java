@@ -1,8 +1,8 @@
 package me.xginko.serverrestart.paper.commands.subcommands;
 
+import me.xginko.serverrestart.common.SRPermission;
 import me.xginko.serverrestart.paper.ServerRestart;
 import me.xginko.serverrestart.paper.commands.SubCommand;
-import me.xginko.serverrestart.paper.enums.Permissions;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -27,7 +27,7 @@ public class DisableSubCmd extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (!sender.hasPermission(Permissions.DISABLE.get())) {
+        if (!sender.hasPermission(SRPermission.DISABLE.permission())) {
             sender.sendMessage(ServerRestart.getLang(sender).no_permission);
             return;
         }

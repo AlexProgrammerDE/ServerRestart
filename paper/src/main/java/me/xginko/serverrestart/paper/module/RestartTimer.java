@@ -1,7 +1,7 @@
 package me.xginko.serverrestart.paper.module;
 
 import me.xginko.serverrestart.paper.ServerRestart;
-import me.xginko.serverrestart.paper.config.PaperConfigImpl;
+import me.xginko.serverrestart.paper.config.PaperConfigCache;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,7 +10,7 @@ import java.time.ZonedDateTime;
 
 public class RestartTimer implements ServerRestartModule {
 
-    private final @NotNull PaperConfigImpl config;
+    private final @NotNull PaperConfigCache config;
     private final boolean do_safe_restart;
 
     private @Nullable ZonedDateTime current_time;

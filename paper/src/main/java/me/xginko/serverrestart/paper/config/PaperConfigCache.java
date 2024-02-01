@@ -1,11 +1,11 @@
-package me.xginko.serverrestart.velocity.config;
+package me.xginko.serverrestart.paper.config;
 
 
 import io.github.thatsmusic99.configurationmaster.api.ConfigFile;
-import me.xginko.serverrestart.common.RestartConfig;
-import me.xginko.serverrestart.velocity.ProxyServerRestart;
-import me.xginko.serverrestart.velocity.enums.MessageMode;
-import me.xginko.serverrestart.velocity.enums.RestartMethod;
+import me.xginko.serverrestart.paper.ServerRestart;
+import me.xginko.serverrestart.common.ConfigCache;
+import me.xginko.serverrestart.paper.enums.MessageMode;
+import me.xginko.serverrestart.paper.enums.RestartMethod;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -18,20 +18,22 @@ import java.time.zone.ZoneRulesException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class VelocityConfigImpl implements RestartConfig {
+public class PaperConfigCache implements ConfigCache {
 
     private final @NotNull ConfigFile configFile;
     public final @NotNull List<ZonedDateTime> restart_times;
     public final @NotNull List<Duration> notification_times;
+    public final @NotNull Duration tick_report_cache_time;
     public final @NotNull ZoneId time_zone_id;
     public final @NotNull Locale default_lang;
     public final @NotNull MessageMode message_mode;
+    public final @NotNull RestartMethod restart_method;
     public final boolean auto_lang;
 
-    public VelocityConfigImpl(File parentDirectory) throws Exception {
+    public PaperConfigCache(File parentDirectory) throws Exception {
         // Create plugin folder first if it does not exist yet
         if (!parentDirectory.exists() && !parentDirectory.mkdir())
-            ProxyServerRestart.getLogger().error("Failed to create plugin folder.");
+            ServerRestart.getLog().error("Failed to create plugin folder.");
         // Load config.yml with ConfigMaster
         this.configFile = ConfigFile.loadConfig(new File(parentDirectory, "config.yml"));
 
@@ -45,14 +47,28 @@ public class VelocityConfigImpl implements RestartConfig {
 
         // General Settings
         this.createTitledSection("General Settings", "general");
+        this.tick_report_cache_time = Duration.ofMillis(Math.max(getInt("general.tps-cache-time-ticks", 40,
+                "How long a checked tps is cached to save resources in ticks (1 sec = 20 ticks)"), 20) * 50L);
+
+        RestartMethod method = RestartMethod.BUKKIT_SHUTDOWN;
+        String configuredMethod = getString("general.restart-method", RestartMethod.BUKKIT_SHUTDOWN.name(),
+                "Available options are: " + String.join(", ", Arrays.stream(RestartMethod.values()).map(Enum::name).toList()));
+        try {
+            method = RestartMethod.valueOf(configuredMethod);
+        } catch (IllegalArgumentException e) {
+            ServerRestart.getLog().warn("RestartMethod '"+configuredMethod+"' is not a valid method. Valid methods are as follows: ");
+            ServerRestart.getLog().warn(String.join(", ", Arrays.stream(RestartMethod.values()).map(Enum::name).toList()));
+        }
+        this.restart_method = method;
+
         ZoneId zoneId = ZoneId.systemDefault();
         try {
             zoneId = ZoneId.of(getString("general.timezone", zoneId.getId(),
                     "The TimeZone (ZoneId) to use for scheduling restart times."));
         } catch (ZoneRulesException e) {
-            ProxyServerRestart.getLogger().warn("Configured timezone could not be found. Using host zone '"+zoneId+"' (System Default)");
+            ServerRestart.getLog().warn("Configured timezone could not be found. Using host zone '"+zoneId+"' (System Default)");
         } catch (DateTimeException e) {
-            ProxyServerRestart.getLogger().warn("Configured timezone has an invalid format. Using '"+zoneId+"' (System Default)");
+            ServerRestart.getLog().warn("Configured timezone has an invalid format. Using '"+zoneId+"' (System Default)");
         }
         this.time_zone_id = zoneId;
 
@@ -69,7 +85,7 @@ public class VelocityConfigImpl implements RestartConfig {
                                 Integer.parseInt(numbers[1]),
                                 Integer.parseInt(numbers[2]));
                     } catch (Throwable t) {
-                        ProxyServerRestart.getLogger().warn("Restart time '"+timeString+"' is not formatted properly. " +
+                        ServerRestart.getLog().warn("Restart time '"+timeString+"' is not formatted properly. " +
                                 "Format: 23:59:59 -> hour:minute:second");
                         return null;
                     }
@@ -80,7 +96,7 @@ public class VelocityConfigImpl implements RestartConfig {
         if (this.restart_times.isEmpty()) {
             final ZonedDateTime systime_02_30_AM = this.getRestartTime(2,30,0);
             this.restart_times.add(systime_02_30_AM);
-            ProxyServerRestart.getLogger().warn("Queued 1 restart for " + systime_02_30_AM + " due to restart times being invalid or empty.");
+            ServerRestart.getLog().warn("Queued 1 restart for " + systime_02_30_AM + " due to restart times being invalid or empty.");
         }
 
         // Notifications
@@ -91,8 +107,8 @@ public class VelocityConfigImpl implements RestartConfig {
         try {
             messageMode = MessageMode.valueOf(configuredMode);
         } catch (IllegalArgumentException e) {
-            ProxyServerRestart.getLogger().warn("MessageMode '"+configuredMode+"' is not a valid mode. Valid modes are as follows: ");
-            ProxyServerRestart.getLogger().warn(String.join(", ", Arrays.stream(RestartMethod.values()).map(Enum::name).toList()));
+            ServerRestart.getLog().warn("MessageMode '"+configuredMode+"' is not a valid mode. Valid modes are as follows: ");
+            ServerRestart.getLog().warn(String.join(", ", Arrays.stream(MessageMode.values()).map(Enum::name).toList()));
         }
         this.message_mode = messageMode;
 
@@ -105,7 +121,7 @@ public class VelocityConfigImpl implements RestartConfig {
                     try {
                         return Duration.parse(text);
                     } catch (DateTimeParseException e) {
-                        ProxyServerRestart.getLogger().warn("Unable to parse Duration '"+text+"'. Is it formatted correctly?");
+                        ServerRestart.getLog().warn("Unable to parse Duration '"+text+"'. Is it formatted correctly?");
                         return null;
                     }
                 })
@@ -160,7 +176,7 @@ public class VelocityConfigImpl implements RestartConfig {
         try {
             this.configFile.save();
         } catch (Exception e) {
-            ProxyServerRestart.getLogger().error("Failed to save config file! - " + e.getLocalizedMessage());
+            ServerRestart.getLog().error("Failed to save config file! - " + e.getLocalizedMessage());
         }
     }
 

@@ -3,7 +3,7 @@ package me.xginko.serverrestart.paper.module;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import me.xginko.serverrestart.paper.ServerRestart;
 import me.xginko.serverrestart.common.CachedTickReport;
-import me.xginko.serverrestart.paper.config.PaperConfigImpl;
+import me.xginko.serverrestart.paper.config.PaperConfigCache;
 import me.xginko.serverrestart.paper.event.RestartEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -27,7 +27,7 @@ public class FireWatch implements ServerRestartModule, Runnable {
         shouldEnable();
         this.tickReports = ServerRestart.getTickReports();
         this.millis_spent_lagging = new AtomicLong();
-        PaperConfigImpl config = ServerRestart.getConfiguration();
+        PaperConfigCache config = ServerRestart.getConfiguration();
         config.createTitledSection("Fire Watch", "fire-watch");
         config.master().addComment("fire-watch.enable",
                 "Reboot the server when lagging for a configurable amount of time.");
