@@ -1,6 +1,7 @@
 package me.xginko.serverrestart.paper;
 
 import me.xginko.serverrestart.common.CachedTickReport;
+import me.xginko.serverrestart.common.SRPermission;
 import me.xginko.serverrestart.folia.FoliaTickReport;
 import me.xginko.serverrestart.paper.commands.RestartsCmd;
 import me.xginko.serverrestart.paper.config.PaperConfigCache;
@@ -13,6 +14,7 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerKickEvent;
+import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -41,6 +43,11 @@ public final class ServerRestart extends JavaPlugin {
         instance = this;
         logger = getComponentLogger();
         server = getServer();
+
+        // Register permissions
+        for (SRPermission permission : SRPermission.values()) {
+            new Permission(permission.permission(), permission.getDescription(), permission.getDefault()).recalculatePermissibles();
+        }
 
         try {
             Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
