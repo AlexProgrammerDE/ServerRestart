@@ -1,6 +1,8 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     id("sr.project-conventions")
-    alias(libs.plugins.shadow)
+    alias(libs.plugins.shadow) apply(false)
 }
 
 val platforms = setOf(
@@ -8,25 +10,17 @@ val platforms = setOf(
     rootProject.projects.serverrestartPaper
 ).map { it.dependencyProject }
 
-
-// HELP ME NO UNDERSTAND
 tasks {
     jar {
-        archiveFileName = "${rootProject.name}-${project.version}-unshaded.jar"
-    }
-
-    shadowJar {
-        archiveFileName = "${rootProject.name}-${project.version}.jar"
-        exclude(
-            "LICENSE",
-            "META-INF/maven/**",
-            "META-INF/**/module-info.class",
-            "META-INF/MANIFEST.MF",
-            "META-INF/LICENSE",
-            "META-INF/LICENSE.txt",
-            "META-INF/NOTICE.txt"
-        )
-        relocate("com.github.benmanes.caffeine", "me.xginko.serverrestart.libs.caffeine")
-        relocate("org.bstats", "me.xginko.serverrestart.libs.bstats")
+        archiveClassifier.set("")
+        archiveFileName.set("ServerRestart-unshaded.jar")
+        destinationDirectory.set(rootProject.projectDir.resolve("build/libs"))
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        platforms.forEach { platform ->
+            val shadowJarTask = platform.tasks.named<ShadowJar>("shadowJar").get()
+            dependsOn(shadowJarTask)
+            dependsOn(platform.tasks.withType<Jar>())
+            from(zipTree(shadowJarTask.archiveFile))
+        }
     }
 }

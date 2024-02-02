@@ -23,10 +23,6 @@ dependencies {
     implementation(libs.configmaster)
 }
 
-tasks.jar {
-    archiveFileName = "${rootProject.name}-${project.version}-unshaded.jar"
-}
-
 tasks.build.configure {
     dependsOn("shadowJar")
 }
