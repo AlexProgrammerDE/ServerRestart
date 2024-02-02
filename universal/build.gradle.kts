@@ -1,8 +1,5 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 plugins {
     id("sr.project-conventions")
-    alias(libs.plugins.shadow) apply(false)
 }
 
 val platforms = setOf(
@@ -17,7 +14,7 @@ tasks {
         destinationDirectory.set(rootProject.projectDir.resolve("build/libs"))
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         platforms.forEach { platform ->
-            val shadowJarTask = platform.tasks.named<ShadowJar>("shadowJar").get()
+            val shadowJarTask = platform.tasks.named<Jar>("shadowJar").get()
             dependsOn(shadowJarTask)
             dependsOn(platform.tasks.withType<Jar>())
             from(zipTree(shadowJarTask.archiveFile))
