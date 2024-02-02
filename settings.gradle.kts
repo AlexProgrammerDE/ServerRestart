@@ -41,4 +41,22 @@ gradleEnterprise {
     }
 }
 
-include("common", "folia", "paper", "velocity")
+setupSRSubproject("folia")
+setupSRSubproject("common")
+setupSRSubproject("paper")
+setupSRSubproject("velocity")
+
+setupSubproject("serverrestart") {
+    projectDir = file("universal")
+}
+
+fun setupSRSubproject(name: String) {
+    setupSubproject("serverrestart-$name") {
+        projectDir = file(name)
+    }
+}
+
+inline fun setupSubproject(name: String, block: ProjectDescriptor.() -> Unit) {
+    include(name)
+    project(":$name").apply(block)
+}

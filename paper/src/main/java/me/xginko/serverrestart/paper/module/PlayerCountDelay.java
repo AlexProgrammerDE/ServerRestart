@@ -1,9 +1,9 @@
 package me.xginko.serverrestart.paper.module;
 
-import me.xginko.serverrestart.paper.ServerRestart;
+import me.xginko.serverrestart.paper.event.PreRestartEvent;
+import me.xginko.serverrestart.paper.ServerRestartPaper;
 import me.xginko.serverrestart.common.CommonUtil;
 import me.xginko.serverrestart.paper.config.PaperConfigCache;
-import me.xginko.serverrestart.paper.event.PreRestartEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Server;
@@ -24,8 +24,8 @@ public class PlayerCountDelay implements ServerRestartModule, Listener {
 
     public PlayerCountDelay() {
         shouldEnable();
-        this.server = ServerRestart.getInstance().getServer();
-        PaperConfigCache config = ServerRestart.getConfiguration();
+        this.server = ServerRestartPaper.getInstance().getServer();
+        PaperConfigCache config = ServerRestartPaper.getConfiguration();
         config.master().addComment("restart-delay.player-count.enable",
                 "If enabled, will only restart once playercount is below the configured number.");
         this.should_log = config.getBoolean("restart-delay.player-count.log", true);
@@ -37,12 +37,12 @@ public class PlayerCountDelay implements ServerRestartModule, Listener {
 
     @Override
     public boolean shouldEnable() {
-        return ServerRestart.getConfiguration().getBoolean("restart-delay.player-count.enable", false);
+        return ServerRestartPaper.getConfiguration().getBoolean("restart-delay.player-count.enable", false);
     }
 
     @Override
     public void enable() {
-        server.getPluginManager().registerEvents(this, ServerRestart.getInstance());
+        server.getPluginManager().registerEvents(this, ServerRestartPaper.getInstance());
     }
 
     @Override
@@ -57,7 +57,7 @@ public class PlayerCountDelay implements ServerRestartModule, Listener {
         event.setCancelled(true);
         event.setDelayMillis(delay_millis);
 
-        if (should_log) ServerRestart.getLog().info(Component.text("Server restart has been delayed by " +
+        if (should_log) ServerRestartPaper.getLog().info(Component.text("Server restart has been delayed by " +
                 CommonUtil.formatDuration(Duration.ofMillis(delay_millis)) + " due to high player count.").color(NamedTextColor.GOLD));
     }
 }

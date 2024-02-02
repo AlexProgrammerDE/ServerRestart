@@ -1,7 +1,7 @@
 package me.xginko.serverrestart.paper.commands.subcommands;
 
 import me.xginko.serverrestart.common.SRPermission;
-import me.xginko.serverrestart.paper.ServerRestart;
+import me.xginko.serverrestart.paper.ServerRestartPaper;
 import me.xginko.serverrestart.paper.commands.SubCommand;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -30,11 +30,11 @@ public class VersionSubCmd extends SubCommand {
     @Override
     public void perform(CommandSender sender, String[] args) {
         if (!sender.hasPermission(SRPermission.VERSION.permission())) {
-            sender.sendMessage(ServerRestart.getLang(sender).no_permission);
+            sender.sendMessage(ServerRestartPaper.getLang(sender).no_permission);
             return;
         }
 
-        final PluginDescriptionFile pluginYML = ServerRestart.getInstance().getDescription();
+        final PluginDescriptionFile pluginYML = ServerRestartPaper.getInstance().getDescription();
 
         sender.sendMessage(
                 Component.newline()

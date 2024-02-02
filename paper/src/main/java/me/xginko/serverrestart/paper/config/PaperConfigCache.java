@@ -2,10 +2,10 @@ package me.xginko.serverrestart.paper.config;
 
 
 import io.github.thatsmusic99.configurationmaster.api.ConfigFile;
-import me.xginko.serverrestart.paper.ServerRestart;
-import me.xginko.serverrestart.common.ConfigCache;
+import me.xginko.serverrestart.paper.ServerRestartPaper;
 import me.xginko.serverrestart.paper.enums.MessageMode;
 import me.xginko.serverrestart.paper.enums.RestartMethod;
+import me.xginko.serverrestart.common.ConfigCache;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -33,7 +33,7 @@ public class PaperConfigCache implements ConfigCache {
     public PaperConfigCache(File parentDirectory) throws Exception {
         // Create plugin folder first if it does not exist yet
         if (!parentDirectory.exists() && !parentDirectory.mkdir())
-            ServerRestart.getLog().error("Failed to create plugin folder.");
+            ServerRestartPaper.getLog().error("Failed to create plugin folder.");
         // Load config.yml with ConfigMaster
         this.configFile = ConfigFile.loadConfig(new File(parentDirectory, "config.yml"));
 
@@ -56,8 +56,8 @@ public class PaperConfigCache implements ConfigCache {
         try {
             method = RestartMethod.valueOf(configuredMethod);
         } catch (IllegalArgumentException e) {
-            ServerRestart.getLog().warn("RestartMethod '"+configuredMethod+"' is not a valid method. Valid methods are as follows: ");
-            ServerRestart.getLog().warn(String.join(", ", Arrays.stream(RestartMethod.values()).map(Enum::name).toList()));
+            ServerRestartPaper.getLog().warn("RestartMethod '"+configuredMethod+"' is not a valid method. Valid methods are as follows: ");
+            ServerRestartPaper.getLog().warn(String.join(", ", Arrays.stream(RestartMethod.values()).map(Enum::name).toList()));
         }
         this.restart_method = method;
 
@@ -66,9 +66,9 @@ public class PaperConfigCache implements ConfigCache {
             zoneId = ZoneId.of(getString("general.timezone", zoneId.getId(),
                     "The TimeZone (ZoneId) to use for scheduling restart times."));
         } catch (ZoneRulesException e) {
-            ServerRestart.getLog().warn("Configured timezone could not be found. Using host zone '"+zoneId+"' (System Default)");
+            ServerRestartPaper.getLog().warn("Configured timezone could not be found. Using host zone '"+zoneId+"' (System Default)");
         } catch (DateTimeException e) {
-            ServerRestart.getLog().warn("Configured timezone has an invalid format. Using '"+zoneId+"' (System Default)");
+            ServerRestartPaper.getLog().warn("Configured timezone has an invalid format. Using '"+zoneId+"' (System Default)");
         }
         this.time_zone_id = zoneId;
 
@@ -85,7 +85,7 @@ public class PaperConfigCache implements ConfigCache {
                                 Integer.parseInt(numbers[1]),
                                 Integer.parseInt(numbers[2]));
                     } catch (Throwable t) {
-                        ServerRestart.getLog().warn("Restart time '"+timeString+"' is not formatted properly. " +
+                        ServerRestartPaper.getLog().warn("Restart time '"+timeString+"' is not formatted properly. " +
                                 "Format: 23:59:59 -> hour:minute:second");
                         return null;
                     }
@@ -96,7 +96,7 @@ public class PaperConfigCache implements ConfigCache {
         if (this.restart_times.isEmpty()) {
             final ZonedDateTime systime_02_30_AM = this.getRestartTime(2,30,0);
             this.restart_times.add(systime_02_30_AM);
-            ServerRestart.getLog().warn("Queued 1 restart for " + systime_02_30_AM + " due to restart times being invalid or empty.");
+            ServerRestartPaper.getLog().warn("Queued 1 restart for " + systime_02_30_AM + " due to restart times being invalid or empty.");
         }
 
         // Notifications
@@ -107,8 +107,8 @@ public class PaperConfigCache implements ConfigCache {
         try {
             messageMode = MessageMode.valueOf(configuredMode);
         } catch (IllegalArgumentException e) {
-            ServerRestart.getLog().warn("MessageMode '"+configuredMode+"' is not a valid mode. Valid modes are as follows: ");
-            ServerRestart.getLog().warn(String.join(", ", Arrays.stream(MessageMode.values()).map(Enum::name).toList()));
+            ServerRestartPaper.getLog().warn("MessageMode '"+configuredMode+"' is not a valid mode. Valid modes are as follows: ");
+            ServerRestartPaper.getLog().warn(String.join(", ", Arrays.stream(MessageMode.values()).map(Enum::name).toList()));
         }
         this.message_mode = messageMode;
 
@@ -121,7 +121,7 @@ public class PaperConfigCache implements ConfigCache {
                     try {
                         return Duration.parse(text);
                     } catch (DateTimeParseException e) {
-                        ServerRestart.getLog().warn("Unable to parse Duration '"+text+"'. Is it formatted correctly?");
+                        ServerRestartPaper.getLog().warn("Unable to parse Duration '"+text+"'. Is it formatted correctly?");
                         return null;
                     }
                 })
@@ -176,7 +176,7 @@ public class PaperConfigCache implements ConfigCache {
         try {
             this.configFile.save();
         } catch (Exception e) {
-            ServerRestart.getLog().error("Failed to save config file! - " + e.getLocalizedMessage());
+            ServerRestartPaper.getLog().error("Failed to save config file! - " + e.getLocalizedMessage());
         }
     }
 

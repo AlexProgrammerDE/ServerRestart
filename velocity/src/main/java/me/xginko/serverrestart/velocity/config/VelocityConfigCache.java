@@ -2,8 +2,8 @@ package me.xginko.serverrestart.velocity.config;
 
 
 import io.github.thatsmusic99.configurationmaster.api.ConfigFile;
-import me.xginko.serverrestart.common.ConfigCache;
 import me.xginko.serverrestart.velocity.ServerRestartVelocity;
+import me.xginko.serverrestart.common.ConfigCache;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;

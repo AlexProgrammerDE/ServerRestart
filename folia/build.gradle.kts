@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation(projects.common)
+    implementation(projects.serverrestartCommon)
 
     compileOnly(libs.folia)
     paperweight.foliaDevBundle(libs.versions.foliabundle.get())

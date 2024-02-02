@@ -1,7 +1,7 @@
 package me.xginko.serverrestart.paper.module;
 
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
-import me.xginko.serverrestart.paper.ServerRestart;
+import me.xginko.serverrestart.paper.ServerRestartPaper;
 import me.xginko.serverrestart.common.CachedTickReport;
 import me.xginko.serverrestart.paper.config.PaperConfigCache;
 import me.xginko.serverrestart.paper.event.RestartEvent;
@@ -25,9 +25,9 @@ public class FireWatch implements ServerRestartModule, Runnable {
 
     public FireWatch() {
         shouldEnable();
-        this.tickReports = ServerRestart.getTickReports();
+        this.tickReports = ServerRestartPaper.getTickReports();
         this.millis_spent_lagging = new AtomicLong();
-        PaperConfigCache config = ServerRestart.getConfiguration();
+        PaperConfigCache config = ServerRestartPaper.getConfiguration();
         config.createTitledSection("Fire Watch", "fire-watch");
         config.master().addComment("fire-watch.enable",
                 "Reboot the server when lagging for a configurable amount of time.");
@@ -46,12 +46,12 @@ public class FireWatch implements ServerRestartModule, Runnable {
 
     @Override
     public boolean shouldEnable() {
-        return ServerRestart.getConfiguration().getBoolean("fire-extinguisher.enable", true);
+        return ServerRestartPaper.getConfiguration().getBoolean("fire-extinguisher.enable", true);
     }
 
     @Override
     public void enable() {
-        ServerRestart plugin = ServerRestart.getInstance();
+        ServerRestartPaper plugin = ServerRestartPaper.getInstance();
         this.HEARTBEAT = plugin.getServer().getAsyncScheduler().runAtFixedRate(
                 plugin,
                 BEAT_TASK -> this.run(),
@@ -79,7 +79,7 @@ public class FireWatch implements ServerRestartModule, Runnable {
      */
     @Override
     public void run() {
-        if (ServerRestart.isRestarting) {
+        if (ServerRestartPaper.isRestarting) {
             disable();
             return;
         }
@@ -99,7 +99,7 @@ public class FireWatch implements ServerRestartModule, Runnable {
         RestartEvent restartEvent = new RestartEvent(
                 true,
                 RestartEvent.RestartType.ON_FIRE,
-                ServerRestart.getConfiguration().restart_method,
+                ServerRestartPaper.getConfiguration().restart_method,
                 do_safe_restart,
                 do_safe_restart,
                 do_safe_restart
@@ -109,12 +109,12 @@ public class FireWatch implements ServerRestartModule, Runnable {
             return;
         }
 
-        ServerRestart.getLog().error(Component.text("Restarting server because on fire! - " +
+        ServerRestartPaper.getLog().error(Component.text("Restarting server because on fire! - " +
                         "TPS: " + String.format("%.2f", tps) + ", " +
                         "MSPT: " + String.format("%.2f", mspt))
                 .color(TextColor.color(255, 81, 112)).decorate(TextDecoration.BOLD));
 
-        ServerRestart.restart(
+        ServerRestartPaper.restart(
                 restartEvent.getMethod(),
                 restartEvent.getDisableJoin(),
                 restartEvent.getKickAll(),

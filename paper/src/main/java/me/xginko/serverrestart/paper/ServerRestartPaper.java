@@ -1,12 +1,12 @@
 package me.xginko.serverrestart.paper;
 
+import me.xginko.serverrestart.paper.commands.RestartsCmd;
+import me.xginko.serverrestart.paper.enums.RestartMethod;
 import me.xginko.serverrestart.common.CachedTickReport;
 import me.xginko.serverrestart.common.SRPermission;
 import me.xginko.serverrestart.folia.FoliaTickReport;
-import me.xginko.serverrestart.paper.commands.RestartsCmd;
 import me.xginko.serverrestart.paper.config.PaperConfigCache;
 import me.xginko.serverrestart.paper.config.PaperLangCache;
-import me.xginko.serverrestart.paper.enums.RestartMethod;
 import me.xginko.serverrestart.paper.module.ServerRestartModule;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Server;
@@ -27,9 +27,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 
-public final class ServerRestart extends JavaPlugin {
+public final class ServerRestartPaper extends JavaPlugin {
 
-    private static ServerRestart instance;
+    private static ServerRestartPaper instance;
     private static PaperConfigCache config;
     private static Map<String, PaperLangCache> languageCacheMap;
     private static Server server;
@@ -70,7 +70,7 @@ public final class ServerRestart extends JavaPlugin {
         if (kickAll) {
             for (Player player : server.getOnlinePlayers()) {
                 player.getScheduler().run(instance, kick -> player.kick(
-                        ServerRestart.getLang(player.locale()).server_restarting,
+                        ServerRestartPaper.getLang(player.locale()).server_restarting,
                         PlayerKickEvent.Cause.RESTART_COMMAND
                 ), null);
             }
@@ -89,7 +89,7 @@ public final class ServerRestart extends JavaPlugin {
         }
     }
 
-    public static ServerRestart getInstance() {
+    public static ServerRestartPaper getInstance() {
         return instance;
     }
 

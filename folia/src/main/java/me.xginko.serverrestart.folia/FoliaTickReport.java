@@ -50,7 +50,7 @@ public final class FoliaTickReport implements CachedTickReport {
             }
         }
 
-        regions.clear(); // clear regions after use
+        regions.clear();
         return lowestRegionTPS;
     }
 
@@ -69,7 +69,7 @@ public final class FoliaTickReport implements CachedTickReport {
             }
         }
 
-        regions.clear(); // clear regions after use
+        regions.clear();
         return highestRegionMSPT;
     }
 }

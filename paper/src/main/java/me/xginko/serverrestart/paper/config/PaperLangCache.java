@@ -1,9 +1,9 @@
 package me.xginko.serverrestart.paper.config;
 
 import io.github.thatsmusic99.configurationmaster.api.ConfigFile;
+import me.xginko.serverrestart.paper.ServerRestartPaper;
 import me.xginko.serverrestart.common.CommonUtil;
 import me.xginko.serverrestart.common.LanguageCache;
-import me.xginko.serverrestart.paper.ServerRestart;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -20,12 +20,12 @@ public class PaperLangCache implements LanguageCache {
             restart_delayed_playercount, countdown_now, restart_in;
 
     public PaperLangCache(String locale) throws Exception {
-        ServerRestart plugin = ServerRestart.getInstance();
+        ServerRestartPaper plugin = ServerRestartPaper.getInstance();
         File langYML = new File(plugin.getDataFolder() + File.separator + "lang", locale + ".yml");
         // Check if the lang folder has already been created
         File parent = langYML.getParentFile();
         if (!parent.exists() && !parent.mkdir())
-            ServerRestart.getLog().error("Unable to create lang directory.");
+            ServerRestartPaper.getLog().error("Unable to create lang directory.");
         // Check if the file already exists and save the one from the plugin resources folder if it does not
         if (!langYML.exists())
             plugin.saveResource("lang" + File.separator + locale + ".yml", false);
@@ -47,7 +47,7 @@ public class PaperLangCache implements LanguageCache {
         try {
             this.langFile.save();
         } catch (Exception e) {
-            ServerRestart.getLog().error("Failed to save language file: "+ langYML.getName() +" - " + e.getLocalizedMessage());
+            ServerRestartPaper.getLog().error("Failed to save language file: "+ langYML.getName() +" - " + e.getLocalizedMessage());
         }
     }
 

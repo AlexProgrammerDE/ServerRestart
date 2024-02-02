@@ -13,8 +13,8 @@ tasks {
 }
 
 dependencies {
-    implementation(projects.common)
-    implementation(projects.folia)
+    implementation(projects.serverrestartCommon)
+    implementation(projects.serverrestartFolia)
 
     compileOnly(libs.paper)
 

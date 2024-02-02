@@ -1,6 +1,6 @@
 package me.xginko.serverrestart.paper.module;
 
-import me.xginko.serverrestart.paper.ServerRestart;
+import me.xginko.serverrestart.paper.ServerRestartPaper;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
@@ -18,7 +18,7 @@ public class JoinToggle implements ServerRestartModule, Listener {
 
     @Override
     public void enable() {
-        ServerRestart plugin = ServerRestart.getInstance();
+        ServerRestartPaper plugin = ServerRestartPaper.getInstance();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -29,10 +29,10 @@ public class JoinToggle implements ServerRestartModule, Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent event) {
-        if (!ServerRestart.joiningAllowed || ServerRestart.isRestarting) {
+        if (!ServerRestartPaper.joiningAllowed || ServerRestartPaper.isRestarting) {
             event.disallow(
                     AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-                    ServerRestart.getLang(ServerRestart.getConfiguration().default_lang).server_restarting
+                    ServerRestartPaper.getLang(ServerRestartPaper.getConfiguration().default_lang).server_restarting
             );
         }
     }

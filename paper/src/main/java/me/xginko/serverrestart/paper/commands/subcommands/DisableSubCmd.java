@@ -1,8 +1,8 @@
 package me.xginko.serverrestart.paper.commands.subcommands;
 
-import me.xginko.serverrestart.common.SRPermission;
-import me.xginko.serverrestart.paper.ServerRestart;
+import me.xginko.serverrestart.paper.ServerRestartPaper;
 import me.xginko.serverrestart.paper.commands.SubCommand;
+import me.xginko.serverrestart.common.SRPermission;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -28,12 +28,12 @@ public class DisableSubCmd extends SubCommand {
     @Override
     public void perform(CommandSender sender, String[] args) {
         if (!sender.hasPermission(SRPermission.DISABLE.permission())) {
-            sender.sendMessage(ServerRestart.getLang(sender).no_permission);
+            sender.sendMessage(ServerRestartPaper.getLang(sender).no_permission);
             return;
         }
 
         sender.sendMessage(Component.text("Disabling SimpleRestarts...").color(NamedTextColor.RED));
-        ServerRestart.getInstance().disablePlugin();
+        ServerRestartPaper.getInstance().disablePlugin();
         sender.sendMessage(Component.text("Disabled all plugin listeners and tasks.").color(NamedTextColor.GREEN));
         sender.sendMessage(Component.text("You can enable the plugin again using the reload command.").color(NamedTextColor.YELLOW));
     }

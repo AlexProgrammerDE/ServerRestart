@@ -1,6 +1,6 @@
-name: ServerRestart
+name: ServerRestartPaper
 version: '${version}'
-main: me.xginko.serverrestart.ServerRestart
+main: me.xginko.serverrestart.ServerRestartPaper
 authors: [ xGinko ]
 description: '${description}'
 website: '${url}'
